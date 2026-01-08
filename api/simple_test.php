@@ -8,7 +8,7 @@ $configs = [
     [
         'host' => 'localhost',
         'user' => 'willi767_labpro_user',
-        'pass' => 'SuaSenhaAqui123',
+        'pass' => 'LabPro2024!',
         'db' => 'willi767_labpro'
     ],
     [
