@@ -6,7 +6,7 @@ header('Access-Control-Allow-Origin: *');
 // Configurações
 define('DB_HOST', 'localhost');
 define('DB_USER', 'willi767_labpro_user');
-define('DB_PASSWORD', 'LabPro2024!');
+define('DB_PASSWORD', 'Escola123!');
 define('DB_NAME', 'willi767_labpro');
 
 try {
