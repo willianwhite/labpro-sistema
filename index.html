@@ -174,7 +174,7 @@
             const resultDiv = document.getElementById('loginResult');
             
             try {
-                const response = await fetch('http://localhost:5000/api/auth/login', {
+                const response = await fetch('https://willianwhiteestevaod1767839682077.2002102.meusitehostgator.com.br/login_php.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -184,26 +184,27 @@
 
                 const data = await response.json();
                 
-                if (response.ok) {
+                if (data.success) {
                     authToken = data.token;
                     
                     // Save to localStorage
                     localStorage.setItem('authToken', authToken);
                     localStorage.setItem('authUser', JSON.stringify(data.user));
                     
-                    resultDiv.innerHTML = `<span class="success">✅ Login Successful!</span>\n\nRedirecionando...`;
+                    resultDiv.innerHTML = `<span class="success">✅ Login realizado com sucesso!</span>\n\nRedirecionando...`;
                     resultDiv.style.display = 'block';
                     
                     // Redirect to dashboard
                     setTimeout(() => {
-                        window.location.href = '/dashboard.html';
+                        window.location.href = 'dashboard.html';
                     }, 1500);
                 } else {
-                    resultDiv.innerHTML = `<span class="error">❌ Login Failed: ${data.message}</span>`;
+                    resultDiv.innerHTML = `<span class="error">❌ Falha no login: ${data.message}</span>`;
                     resultDiv.style.display = 'block';
                 }
             } catch (error) {
-                resultDiv.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+                console.error('Login error:', error);
+                resultDiv.innerHTML = `<span class="error">❌ Erro de conexão: ${error.message}</span>`;
                 resultDiv.style.display = 'block';
             }
         }
