@@ -2,9 +2,9 @@
 // Configurações do Banco de Dados MySQL
 define('DB_HOST', 'localhost');
 define('DB_PORT', '3306');
-define('DB_NAME', 'labpro');
-define('DB_USER', 'labpro_user');
-define('DB_PASSWORD', 'SUA_SENHA_AQUI');
+define('DB_NAME', 'willi767_labpro');
+define('DB_USER', 'willi767_labpro_user');
+define('DB_PASSWORD', 'Escola123!');
 
 // Configurações da API
 define('API_VERSION', '1.0.0');
