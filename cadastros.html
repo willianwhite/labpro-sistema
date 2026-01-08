@@ -2554,13 +2554,59 @@
             alert(`Ver detalhes do material ${id}`);
         }
 
+        // Função para filtrar clientes na busca
+        function filtrarClientes(searchTerm) {
+            const clientsGrid = document.querySelector('.clients-grid');
+            if (!clientsGrid) return;
+
+            const clientCards = clientsGrid.querySelectorAll('.client-card');
+            
+            clientCards.forEach(card => {
+                const nome = card.querySelector('h3')?.textContent.toLowerCase() || '';
+                const whatsapp = card.querySelector('.whatsapp')?.textContent.toLowerCase() || '';
+                const email = card.querySelector('.email')?.textContent.toLowerCase() || '';
+                const tipo = card.querySelector('.client-type')?.textContent.toLowerCase() || '';
+                
+                const searchText = `${nome} ${whatsapp} ${email} ${tipo}`;
+                
+                if (searchText.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Mostrar mensagem se nenhum cliente encontrado
+            const visibleCards = Array.from(clientCards).filter(card => card.style.display !== 'none');
+            
+            // Remover mensagem anterior se existir
+            const existingMessage = clientsGrid.querySelector('.no-results');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // Adicionar mensagem se nenhum resultado
+            if (visibleCards.length === 0 && searchTerm.length > 0) {
+                const noResultsMessage = document.createElement('div');
+                noResultsMessage.className = 'no-results';
+                noResultsMessage.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #666;">
+                        <i style="font-size: 3rem; margin-bottom: 1rem;">🔍</i>
+                        <h3>Nenhum cliente encontrado</h3>
+                        <p>Não encontramos clientes com "${searchTerm}"</p>
+                    </div>
+                `;
+                clientsGrid.appendChild(noResultsMessage);
+            }
+        }
+
         // Função de pesquisa
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', function(e) {
                     const searchTerm = e.target.value.toLowerCase();
-                    // Implementar lógica de pesquisa aqui
+                    filtrarClientes(searchTerm);
                 });
             }
             
