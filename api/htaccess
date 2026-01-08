@@ -1,0 +1,14 @@
+RewriteEngine On
+
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ index.php [L]
+
+RewriteRule ^health/?$ index.php [L,QSA]
+RewriteRule ^clientes/?$ clientes.php [L,QSA]
+RewriteRule ^clientes/([0-9]+)/?$ clientes.php?id=$1 [L,QSA]
