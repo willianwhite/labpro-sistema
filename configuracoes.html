@@ -1302,11 +1302,19 @@
             }
             
             // Expandir menu Configurações por padrão
-            const configuracoesMenu = document.querySelector('.menu-title[data-icon="⚙️"]').parentElement.querySelector('.submenu');
-            const configuracoesArrow = document.querySelector('.menu-title[data-icon="⚙️"]').parentElement.querySelector('.arrow');
+            const configuracoesMenu = document.querySelector('.menu-title[data-icon="⚙️"]');
+            const configuracoesArrow = document.querySelector('.menu-title[data-icon="⚙️"]');
+            
             if (configuracoesMenu) {
-                configuracoesMenu.classList.add('active');
-                if (configuracoesArrow) configuracoesArrow.classList.add('rotated');
+                const submenu = configuracoesMenu.parentElement.querySelector('.submenu');
+                const arrow = configuracoesMenu.parentElement.querySelector('.arrow');
+                
+                if (submenu) {
+                    submenu.classList.add('active');
+                }
+                if (arrow) {
+                    arrow.classList.add('rotated');
+                }
             }
             
             // Toggle switches

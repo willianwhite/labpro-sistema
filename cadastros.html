@@ -2626,11 +2626,19 @@
             atualizarListaClientes();
             
             // Expandir menu Cadastros por padrão
-            const cadastrosMenu = document.querySelector('.menu-title[data-icon="📋"]').parentElement.querySelector('.submenu');
-            const cadastrosArrow = document.querySelector('.menu-title[data-icon="📋"]').parentElement.querySelector('.arrow');
+            const cadastrosMenu = document.querySelector('.menu-title[data-icon="📋"]');
+            const cadastrosArrow = document.querySelector('.menu-title[data-icon="📋"]');
+            
             if (cadastrosMenu) {
-                cadastrosMenu.classList.add('active');
-                if (cadastrosArrow) cadastrosArrow.classList.add('rotated');
+                const submenu = cadastrosMenu.parentElement.querySelector('.submenu');
+                const arrow = cadastrosMenu.parentElement.querySelector('.arrow');
+                
+                if (submenu) {
+                    submenu.classList.add('active');
+                }
+                if (arrow) {
+                    arrow.classList.add('rotated');
+                }
             }
         });
     </script>

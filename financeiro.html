@@ -1393,10 +1393,19 @@
             setInterval(updateDate, 60000); // Atualizar a cada minuto
             
             // Expandir menu Financeiro por padrão
-            const financeiroMenu = document.querySelector('.menu-title[data-icon="💰"]').parentElement.querySelector('.submenu');
-            const financeiroArrow = document.querySelector('.menu-title[data-icon="💰"]').parentElement.querySelector('.arrow');
+            const financeiroMenu = document.querySelector('.menu-title[data-icon="💰"]');
+            const financeiroArrow = document.querySelector('.menu-title[data-icon="💰"]');
+            
             if (financeiroMenu) {
-                financeiroMenu.classList.add('active');
+                const submenu = financeiroMenu.parentElement.querySelector('.submenu');
+                const arrow = financeiroMenu.parentElement.querySelector('.arrow');
+                
+                if (submenu) {
+                    submenu.classList.add('active');
+                }
+                if (arrow) {
+                    arrow.classList.add('rotated');
+                }
             }
         });
     </script>

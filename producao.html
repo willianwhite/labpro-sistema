@@ -1583,11 +1583,19 @@
             }
             
             // Expandir menu Produção por padrão
-            const producaoMenu = document.querySelector('.menu-title[data-icon="🏭"]').parentElement.querySelector('.submenu');
-            const producaoArrow = document.querySelector('.menu-title[data-icon="🏭"]').parentElement.querySelector('.arrow');
+            const producaoMenu = document.querySelector('.menu-title[data-icon="🏭"]');
+            const producaoArrow = document.querySelector('.menu-title[data-icon="🏭"]');
+            
             if (producaoMenu) {
-                producaoMenu.classList.add('active');
-                if (producaoArrow) producaoArrow.classList.add('rotated');
+                const submenu = producaoMenu.parentElement.querySelector('.submenu');
+                const arrow = producaoMenu.parentElement.querySelector('.arrow');
+                
+                if (submenu) {
+                    submenu.classList.add('active');
+                }
+                if (arrow) {
+                    arrow.classList.add('rotated');
+                }
             }
         });
     </script>
