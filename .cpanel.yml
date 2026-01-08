@@ -1,0 +1,54 @@
+# cPanel Deployment Configuration for LabPro
+# Configuração de deploy automático para o sistema LabPro
+
+deploy:
+  # Diretório de destino no servidor
+  deployment_path: /public_html
+  
+  # Branch a ser deployado
+  branch: main
+  
+  # Arquivos e pastas para incluir
+  include:
+    - "*.html"
+    - "*.php"
+    - "*.js"
+    - "*.css"
+    - "*.ico"
+    - "api/**"
+    - "css/**"
+    - "assets/**"
+  
+  # Arquivos e pastas para excluir
+  exclude:
+    - "*.bat"
+    - "*.md"
+    - "README*"
+    - ".git*"
+    - "node_modules/**"
+    - "*.zip"
+    - "*.tar.gz"
+  
+  # Permissões dos arquivos
+  permissions:
+    "*.php": "644"
+    "*.html": "644"
+    "*.js": "644"
+    "*.css": "644"
+    "*.ico": "644"
+    "api/": "755"
+    "css/": "755"
+    "assets/": "755"
+  
+  # Pós-comandos (opcional)
+  post_deploy:
+    - echo "LabPro deploy concluído com sucesso!"
+
+# Configurações de ambiente
+environment:
+  name: "LabPro Production"
+  php_version: "8.3"
+  
+# Notificações (opcional)
+notifications:
+  email: "willianwhite@example.com"
