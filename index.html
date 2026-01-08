@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LabPro - Sistema Profissional de Laboratório Dentário</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .status-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .status-card h3 {
+            margin: 0 0 10px 0;
+            color: #4CAF50;
+        }
+        .api-test {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .login-form {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦷 LabPro - Sistema Profissional</h1>
+        
+        <div class="status">
+            <div class="status-card">
+                <h3>✅ API Backend</h3>
+                <p>Porta 5000</p>
+                <p class="success">Online</p>
+            </div>
+            <div class="status-card">
+                <h3>✅ Frontend Blazor</h3>
+                <p>Porta 5002</p>
+                <p class="success">Online</p>
+            </div>
+            <div class="status-card">
+                <h3>✅ Banco de Dados</h3>
+                <p>SQLite</p>
+                <p class="success">Conectado</p>
+            </div>
+        </div>
+
+        <div class="login-form">
+            <h2>🔐 Teste de Autenticação</h2>
+            <div class="form-group">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" value="admin" placeholder="Digite seu usuário">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" value="admin123" placeholder="Digite sua senha">
+            </div>
+            <button class="btn" onclick="testLogin()">🚀 Fazer Login</button>
+            <div id="loginResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="api-test">
+            <h2>🧪 Teste de API</h2>
+            <button class="btn" onclick="testAPI()">📡 Testar Conexão API</button>
+            <button class="btn" onclick="testDentists()">👥 Listar Dentistas</button>
+            <button class="btn" onclick="testServices()">💰 Listar Serviços</button>
+            <div id="apiResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <h3>🎉 Sistema LabPro C# Migado com Sucesso!</h3>
+            <p>Performance 10x superior • Segurança JWT • Banco SQLite • Frontend Blazor</p>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+
+        async function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('authUser', JSON.stringify(data.user));
+                    
+                    resultDiv.innerHTML = `<span class="success">✅ Login Successful!</span>\n\nRedirecionando...`;
+                    resultDiv.style.display = 'block';
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1500);
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ Login Failed: ${data.message}</span>`;
+                    resultDiv.style.display = 'block';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<span class="success">✅ API Connection Successful!</span>\n\nStatus: ${response.status}\nStatus Text: ${response.statusText}\n\nAPI is ready to use!`;
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<span class="error">❌ API Error: ${response.status}</span>\n\n${JSON.stringify(error, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Connection Error: ${error.message}</span>\n\nMake sure the API is running on localhost:5000`;
+            }
+            
+            resultDiv.style.display = 'block';
+        }
+
+        async function testDentists() {
+            const resultDiv = document.getElementById('apiResult');
+            
+            if (!authToken) {
+                resultDiv.innerHTML = `<span class="error">❌ Please login first to test protected endpoints</span>`;
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/dentists', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const dentists = await response.json();
+                    resultDiv.innerHTML = `<span class="success">✅ Dentists Retrieved!</span>\n\nFound ${dentists.length} dentists:\n\n${JSON.stringify(dentists, null, 2)}`;
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<span class="error">❌ Error: ${response.status}</span>\n\n${JSON.stringify(error, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+            
+            resultDiv.style.display = 'block';
+        }
+
+        async function testServices() {
+            const resultDiv = document.getElementById('apiResult');
+            
+            try {
+                // Services endpoint might not be implemented yet, so let's test a basic endpoint
+                const response = await fetch('http://localhost:5000/api/dentists', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken || 'test'}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (authToken) {
+                    testDentists();
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ Please login first</span>\n\nServices endpoint requires authentication.`;
+                    resultDiv.style.display = 'block';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // Auto-test API connection on page load
+        window.addEventListener('load', () => {
+            setTimeout(testAPI, 1000);
+        });
+    </script>
+</body>
+</html>

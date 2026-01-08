@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Produção - LabPro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .production-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .production-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .production-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .production-card h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-em-andamento {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .status-concluido {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .status-pendente {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .status-atrasado {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+        }
+
+        .production-details {
+            margin-top: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .filter-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .stats-grid,
+            .production-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏭 Controle de Produção</h1>
+        <div class="user-info">
+            <span>👤 Usuário: Administrador</span>
+            <span>📅 <span id="currentDate"></span></span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Estatísticas Gerais -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>📊 Produção do Dia</h3>
+                <div class="value">24</div>
+                <div class="description">Ordens de serviço concluídas hoje</div>
+            </div>
+            <div class="stat-card">
+                <h3>⏱️ Tempo Médio</h3>
+                <div class="value">2.5h</div>
+                <div class="description">Tempo médio de produção por ordem</div>
+            </div>
+            <div class="stat-card">
+                <h3>📈 Produtividade</h3>
+                <div class="value">+15%</div>
+                <div class="description">Aumento em relação ao mês anterior</div>
+            </div>
+            <div class="stat-card">
+                <h3>⚠️ Pendências</h3>
+                <div class="value">3</div>
+                <div class="description">Ordens em atraso</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+            <h3>🔍 Filtros</h3>
+            <div class="filter-group">
+                <label>Período:</label>
+                <select id="periodFilter">
+                    <option value="today">Hoje</option>
+                    <option value="week">Esta Semana</option>
+                    <option value="month">Este Mês</option>
+                    <option value="custom">Personalizado</option>
+                </select>
+                
+                <label>Status:</label>
+                <select id="statusFilter">
+                    <option value="all">Todos</option>
+                    <option value="em-andamento">Em Andamento</option>
+                    <option value="concluido">Concluído</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="atrasado">Atrasado</option>
+                </select>
+                
+                <label>Cliente:</label>
+                <select id="clientFilter">
+                    <option value="">Todos os Clientes</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Ordens em Produção -->
+        <div class="production-grid">
+            <div class="production-card">
+                <h4>OS-00025</h4>
+                <div class="status-badge status-em-andamento">Em Andamento</div>
+                <div class="production-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Cliente:</span>
+                        <span class="detail-value">Dra. Maria Silva</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Serviço:</span>
+                        <span class="detail-value">Prótese Total</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Dentes:</span>
+                        <span class="detail-value">11, 12, 13, 14, 15</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Início:</span>
+                        <span class="detail-value">08:30</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Previsão:</span>
+                        <span class="detail-value">14:00</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Progresso:</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="verDetalhes('OS-00025')">
+                        <i class="fas fa-eye"></i> Ver Detalhes
+                    </button>
+                    <button class="btn btn-secondary" onclick="atualizarStatus('OS-00025')">
+                        <i class="fas fa-edit"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <div class="production-card">
+                <h4>OS-00024</h4>
+                <div class="status-badge status-concluido">Concluído</div>
+                <div class="production-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Cliente:</span>
+                        <span class="detail-value">Dr. João Santos</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Serviço:</span>
+                        <span class="detail-value">Ortodontia</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Dentes:</span>
+                        <span class="detail-value">21, 22, 23, 24, 25</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Início:</span>
+                        <span class="detail-value">10:00</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Conclusão:</span>
+                        <span class="detail-value">13:45</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tempo Total:</span>
+                        <span class="detail-value">3h 45min</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="verDetalhes('OS-00024')">
+                        <i class="fas fa-eye"></i> Ver Detalhes
+                    </button>
+                    <button class="btn btn-secondary" onclick="imprimirOS('OS-00024')">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+
+            <div class="production-card">
+                <h4>OS-00023</h4>
+                <div class="status-badge status-pendente">Pendente</div>
+                <div class="production-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Cliente:</span>
+                        <span class="detail-value">Clinica Sorriso Feliz</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Serviço:</span>
+                        <span class="detail-value">Implante</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Dentes:</span>
+                        <span class="detail-value">31, 32, 33, 34, 35</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Previsão:</span>
+                        <span class="detail-value">16:00</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Atraso:</span>
+                        <span class="detail-value">1 dia</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="iniciarProducao('OS-00023')">
+                        <i class="fas fa-play"></i> Iniciar Produção
+                    </button>
+                    <button class="btn btn-secondary" onclick="verDetalhes('OS-00023')">
+                        <i class="fas fa-eye"></i> Ver Detalhes
+                    </button>
+                </div>
+            </div>
+
+            <div class="production-card">
+                <h4>OS-00022</h4>
+                <div class="status-badge status-atrasado">Atrasado</div>
+                <div class="production-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Cliente:</span>
+                        <span class="detail-value">Dra. Maria Silva</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Serviço:</span>
+                        <span class="detail-value">Dentística</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Dentes:</span>
+                        <span class="detail-value">16, 17, 18, 26, 27</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Previsão:</span>
+                        <span class="detail-value">Ontem, 17:00</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Atraso:</span>
+                        <span class="detail-value">2 dias</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="priorizarOS('OS-00022')">
+                        <i class="fas fa-exclamation-triangle"></i> Priorizar
+                    </button>
+                    <button class="btn btn-secondary" onclick="verDetalhes('OS-00022')">
+                        <i class="fas fa-eye"></i> Ver Detalhes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar data atual
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', options);
+        }
+
+        // Funções de interação
+        function verDetalhes(osId) {
+            alert(`Ver detalhes da OS ${osId}`);
+        }
+
+        function atualizarStatus(osId) {
+            alert(`Atualizar status da OS ${osId}`);
+        }
+
+        function iniciarProducao(osId) {
+            alert(`Iniciar produção da OS ${osId}`);
+        }
+
+        function imprimirOS(osId) {
+            alert(`Imprimir OS ${osId}`);
+        }
+
+        function priorizarOS(osId) {
+            alert(`Priorizar OS ${osId}`);
+        }
+
+        // Inicialização
+        updateDate();
+        setInterval(updateDate, 60000); // Atualizar a cada minuto
+    </script>
+</body>
+</html>

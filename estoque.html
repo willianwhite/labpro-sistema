@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque - LabPro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .logo {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-text {
+            transition: opacity 0.3s ease;
+            flex: 1;
+        }
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .menu-title {
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .menu-title:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .menu-title.active {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .menu-title span:first-child {
+            transition: opacity 0.3s ease;
+        }
+        .sidebar.collapsed .menu-title span:first-child {
+            font-size: 0;
+        }
+        .sidebar.collapsed .menu-title span:first-child::before {
+            content: attr(data-icon);
+            font-size: 1.5rem;
+            display: block;
+            text-align: center;
+        }
+        .sidebar.collapsed .menu-title {
+            justify-content: center;
+            padding: 0.75rem 0.5rem;
+        }
+        .submenu {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s ease;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .sidebar.collapsed .submenu {
+            display: none;
+        }
+        .menu-item {
+            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar.collapsed .arrow {
+            display: none;
+        }
+        .sidebar.collapsed .menu-item {
+            display: none;
+        }
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+        .sidebar.collapsed + .main-content {
+            margin-left: 70px;
+        }
+        .top-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            margin: -2rem -2rem 2rem -2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        body.dark-theme .sidebar {
+            background: rgba(0, 0, 0, 0.5);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .top-bar {
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .stat-card,
+        body.dark-theme .page-content,
+        body.dark-theme .form-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .menu-title {
+            color: #81C784;
+        }
+        body.dark-theme .menu-title.active {
+            background: rgba(129, 199, 132, 0.2);
+        }
+        body.dark-theme .form-group input,
+        body.dark-theme .form-group select,
+        body.dark-theme .form-group textarea {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        body.dark-theme .form-group label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .product-card h4 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .product-info .product-code {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        body.dark-theme .product-info .product-name {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .product-info .product-category {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        body.dark-theme .product-info .product-price {
+            color: #81C784;
+        }
+        body.dark-theme .product-stock {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        body.dark-theme .stock-low {
+            color: #ff6b6b;
+        }
+        body.dark-theme .stock-medium {
+            color: #feca57;
+        }
+        body.dark-theme .stock-high {
+            color: #4CAF50;
+        }
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .nav-tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .nav-tab:hover {
+            color: white;
+        }
+        
+        /* Dark theme para elementos que ficam no light */
+        body.dark-theme .nav-tab {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.dark-theme .nav-tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+        
+        body.dark-theme .nav-tab:hover {
+            color: white;
+        }
+        
+        body.dark-theme .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme .stat-card h3 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.dark-theme .stat-card .value {
+            color: #81C784;
+        }
+        
+        body.dark-theme .stat-card .description {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        body.dark-theme .form-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme .form-card h3 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.dark-theme .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        body.dark-theme .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        body.dark-theme .btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        body.dark-theme .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        body.dark-theme .btn-primary {
+            background: #667eea;
+        }
+        
+        body.dark-theme .btn-primary:hover {
+            background: #5a67d8;
+        }
+        
+        /* Dark theme para Orçamento */
+        body.dark-theme .section-header h2 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.dark-theme .budget-table {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme th {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.dark-theme td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.dark-theme tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-theme .amount-positive {
+            color: #28a745;
+        }
+        
+        body.dark-theme .amount-negative {
+            color: #dc3545;
+        }
+        
+        body.dark-theme .status-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.dark-theme .status-high {
+            background: #28a745;
+            color: white;
+        }
+        
+        body.dark-theme .status-medium {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        body.dark-theme .status-low {
+            background: #dc3545;
+            color: white;
+        }
+        
+        body.dark-theme .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        body.dark-theme .action-btn.view {
+            background: #28a745;
+        }
+        
+        body.dark-theme .action-btn.edit {
+            background: #667eea;
+        }
+        
+        body.dark-theme .action-btn.add {
+            background: #28a745;
+        }
+        
+        /* Estilos base para tema light (garantir legibilidade) */
+        .section-header h2 {
+            color: #333;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .budget-table {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+            color: #333;
+        }
+
+        tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .amount-positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .amount-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-high {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .status-medium {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+        }
+
+        .status-low {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .action-btn.view {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-btn.edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.add {
+            background: #ffa500;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            color: #333;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            max-width: 400px;
+            margin-bottom: 2rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .product-info h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .product-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .product-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            color: #666;
+            min-width: 80px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .action-btn.edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .action-btn.view {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-btn.add {
+            background: #ffa500;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-high {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        body.dark-theme .status-inactive {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .status-medium {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: white;
+        }
+
+        .status-low {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .budget-table {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .amount-positive {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .amount-negative {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .filter-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar {
+                max-width: 100%;
+            }
+        }
+    </style>
+    <script src="shared.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span class="logo-text">🦷 LabPro</span>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        </div>
+        
+        <div class="menu-section">
+            <div class="menu-title" onclick="showPage('inicio')">
+                <span data-icon="🏠">🏠 Início</span>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="🏭">🏭 Produção</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('ordem-servico')">Ordem de Serviço</div>
+                <div class="menu-item" onclick="showPage('controle-producao')">Controle de Produção</div>
+                <div class="menu-item" onclick="showPage('agenda-producao')">Agenda de Produção</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="💰">💰 Financeiro</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('contas-receber')">Contas a Receber</div>
+                <div class="menu-item" onclick="showPage('contas-pagar')">Contas a Pagar</div>
+                <div class="menu-item" onclick="showPage('conta-bancaria')">Conta Bancaria</div>
+                <div class="menu-item" onclick="showPage('caixa-fisico')">Caixa Fisico</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📋">📋 Cadastros</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('clientes')">Clientes</div>
+                <div class="menu-item" onclick="showPage('tabela-precos')">Tabela de Preços</div>
+                <div class="menu-item" onclick="showPage('setores')">Setores</div>
+                <div class="menu-item" onclick="showPage('materiais')">Materiais Rec Dentista</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📦">📦 Estoque</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('produtos')">Produtos</div>
+                <div class="menu-item" onclick="showPage('orcamento')">Orçamento</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📊">📊 Relatórios</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('fluxo-caixa')">Fluxo de caixa</div>
+                <div class="menu-item" onclick="showPage('relatorio-producao')">Produção</div>
+                <div class="menu-item" onclick="showPage('relatorio-estoque')">Estoque</div>
+                <div class="menu-item" onclick="showPage('logs')">Logs</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="⚙️">⚙️ Configurações</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('configuracoes-gerais')">Configurações Gerais</div>
+                <div class="menu-item" onclick="showPage('usuarios')">Usuários</div>
+                <div class="menu-item" onclick="showPage('modelo-ficha')">Modelo de Ficha</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 id="pageTitle">📦 Estoque</h1>
+            <div class="user-info">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeText">Dark</span>
+                </button>
+                <span id="userName">Administrador</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </div>
+        <!-- Navegação entre abas -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('produtos')">
+                📦 Produtos
+            </button>
+            <button class="nav-tab" onclick="showTab('orcamento')">
+                📝 Orçamento
+            </button>
+        </div>
+
+        <!-- Aba Produtos -->
+        <div id="produtos" class="tab-content active">
+            <!-- Estatísticas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📦 Total de Itens</h3>
+                    <div class="value">1.245</div>
+                    <div class="description">Produtos cadastrados</div>
+                </div>
+                <div class="stat-card">
+                    <h3>💰 Valor Total</h3>
+                    <div class="value">R$ 89.450</div>
+                    <div class="description">Valor do estoque</div>
+                </div>
+                <div class="stat-card">
+                    <h3>⚠️ Estoque Baixo</h3>
+                    <div class="value">23</div>
+                    <div class="description">Produtos com estoque crítico</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📈 Movimentações</h3>
+                    <div class="value">156</div>
+                    <div class="description">Movimentações este mês</div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2>📦 Produtos</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="novoProduto()">
+                        <i class="fas fa-plus"></i> Novo Produto
+                    </button>
+                    <button class="btn btn-secondary" onclick="importarProdutos()">
+                        <i class="fas fa-upload"></i> Importar
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportarProdutos()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>Categoria:</label>
+                    <select id="categoryFilter">
+                        <option value="">Todas</option>
+                        <option value="resina">Resina</option>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Pesquisar produtos...">
+            </div>
+
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-info">
+                            <h4>Resina Composta 3M</h4>
+                            <p>🏷️ Código: RES-001</p>
+                            <p>📦 Categoria: Resina</p>
+                            <p>🏢 Fornecedor: 3M</p>
+                        </div>
+                        <div class="product-image">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Estoque:</span>
+                            <span class="detail-value">45 unidades</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Valor:</span>
+                            <span class="detail-value">R$ 120,00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Mínimo:</span>
+                            <span class="detail-value">10 unidades</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="status-badge status-high">OK</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="action-btn view" onclick="verProduto('001')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit" onclick="editarProduto('001')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn add" onclick="adicionarEstoque('001')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-info">
+                            <h4>Cerâmica IPS E.max</h4>
+                            <p>🏷️ Código: CER-002</p>
+                            <p>📦 Categoria: Cerâmica</p>
+                            <p>🏢 Fornecedor: Ivoclar</p>
+                        </div>
+                        <div class="product-image">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Estoque:</span>
+                            <span class="detail-value">8 unidades</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Valor:</span>
+                            <span class="detail-value">R$ 450,00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Mínimo:</span>
+                            <span class="detail-value">15 unidades</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="status-badge status-low">Baixo</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="action-btn view" onclick="verProduto('002')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit" onclick="editarProduto('002')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn add" onclick="adicionarEstoque('002')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-info">
+                            <h4>Liga de Cromo-Cobalto</h4>
+                            <p>🏷️ Código: MET-003</p>
+                            <p>📦 Categoria: Metal</p>
+                            <p>🏢 Fornecedor: Degudent</p>
+                        </div>
+                        <div class="product-image">
+                            <i class="fas fa-atom"></i>
+                        </div>
+                    </div>
+                    <div class="product-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Estoque:</span>
+                            <span class="detail-value">25 kg</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Valor:</span>
+                            <span class="detail-value">R$ 280,00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Mínimo:</span>
+                            <span class="detail-value">10 kg</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="status-badge status-medium">Médio</span>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button class="action-btn view" onclick="verProduto('003')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn edit" onclick="editarProduto('003')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn add" onclick="adicionarEstoque('003')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Orçamento -->
+        <div id="orcamento" class="tab-content">
+            <div class="section-header">
+                <h2>📝 Orçamento</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="novoOrcamento()">
+                        <i class="fas fa-plus"></i> Novo Orçamento
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportarOrcamentos()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+
+            <div class="budget-table">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Serviço</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Validade</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#ORC-001</td>
+                                <td>Dr. João Santos</td>
+                                <td>Prótese Total</td>
+                                <td>Coroa em metalocerâmica - 11,12,13</td>
+                                <td class="amount-positive">R$ 3.600,00</td>
+                                <td><span class="status-badge status-high">Aprovado</span></td>
+                                <td>30/12/2024</td>
+                                <td>
+                                    <button class="action-btn view" onclick="verOrcamento('001')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn edit" onclick="editarOrcamento('001')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#ORC-002</td>
+                                <td>Dra. Maria Silva</td>
+                                <td>Ortodontia</td>
+                                <td>Aparelho removível - Arcada completa</td>
+                                <td class="amount-positive">R$ 2.500,00</td>
+                                <td><span class="status-badge status-medium">Pendente</span></td>
+                                <td>25/12/2024</td>
+                                <td>
+                                    <button class="action-btn view" onclick="verOrcamento('002')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn edit" onclick="editarOrcamento('002')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#ORC-003</td>
+                                <td>Clinica Sorriso Feliz</td>
+                                <td>Implante</td>
+                                <td>Implante unitário - 31,32</td>
+                                <td class="amount-positive">R$ 4.200,00</td>
+                                <td><span class="status-badge status-low">Expirado</span></td>
+                                <td>15/12/2024</td>
+                                <td>
+                                    <button class="action-btn view" onclick="verOrcamento('003')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="action-btn edit" onclick="editarOrcamento('003')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar data atual
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.textContent = now.toLocaleDateString('pt-BR', options);
+            }
+        }
+
+        // Funções específicas do estoque
+
+        // Funções de interação
+
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            const arrow = element.querySelector('.arrow');
+            
+            // Fechar outros submenus
+            document.querySelectorAll('.submenu').forEach(menu => {
+                if (menu !== submenu) {
+                    menu.classList.remove('active');
+                }
+            });
+            
+            document.querySelectorAll('.arrow').forEach(a => {
+                if (a !== arrow) {
+                    a.classList.remove('rotated');
+                }
+            });
+            
+            // Toggle current submenu
+            submenu.classList.toggle('active');
+            arrow.classList.toggle('rotated');
+        }
+
+        function showPage(pageId) {
+            // Para páginas do mesmo módulo, mostrar abas internas
+            const internalPages = ['produtos', 'orcamento'];
+            if (internalPages.includes(pageId)) {
+                showTab(pageId);
+                return;
+            }
+            
+            // Redirecionar para os novos arquivos HTML separados
+            const pageUrls = {
+                'ordem-servico': '/producao.html',
+                'controle-producao': '/producao.html',
+                'agenda-producao': '/producao.html',
+                'contas-receber': '/financeiro.html',
+                'contas-pagar': '/financeiro.html',
+                'conta-bancaria': '/financeiro.html',
+                'caixa-fisico': '/financeiro.html',
+                'clientes': '/cadastros.html',
+                'tabela-precos': '/cadastros.html',
+                'setores': '/cadastros.html',
+                'materiais': '/cadastros.html',
+                'fluxo-caixa': '/relatorio.html',
+                'relatorio-producao': '/relatorio.html',
+                'relatorio-estoque': '/relatorio.html',
+                'logs': '/relatorio.html',
+                'configuracoes-gerais': '/configuracoes.html',
+                'usuarios': '/configuracoes.html',
+                'modelo-ficha': '/configuracoes.html'
+            };
+            
+            // Se a página tiver um URL separado, redirecionar
+            if (pageUrls[pageId]) {
+                window.location.href = pageUrls[pageId];
+                return;
+            }
+            
+            // Para página início, redirecionar para o dashboard
+            if (pageId === 'inicio') {
+                window.location.href = '/dashboard.html';
+                return;
+            }
+        }
+
+        // Funções de interação
+        function novoProduto() {
+            alert('Abrir formulário para novo produto');
+        }
+
+        function editarProduto(id) {
+            alert(`Editar produto ${id}`);
+        }
+
+        function excluirProduto(id) {
+            if (confirm(`Deseja excluir o produto ${id}?`)) {
+                alert(`Produto ${id} excluído com sucesso!`);
+            }
+        }
+
+        function verProduto(id) {
+            alert(`Ver detalhes do produto ${id}`);
+        }
+
+        function exportarProdutos() {
+            alert('Exportar lista de produtos');
+        }
+
+        function novoOrcamento() {
+            alert('Abrir formulário para novo orçamento');
+        }
+
+        function editarOrcamento(id) {
+            alert(`Editar orçamento ${id}`);
+        }
+
+        function verOrcamento(id) {
+            alert(`Ver detalhes do orçamento ${id}`);
+        }
+
+        function exportarOrcamentos() {
+            alert('Exportar lista de orçamentos');
+        }
+
+        // Função de pesquisa
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const productCards = document.querySelectorAll('.product-card');
+                    
+                    productCards.forEach(card => {
+                        const productInfo = card.querySelector('.product-info');
+                        const text = productInfo.textContent.toLowerCase();
+                        
+                        if (text.includes(searchTerm)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            // Inicialização
+            updateDate();
+            setInterval(updateDate, 60000);
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Light';
+            }
+            
+            // Expandir menu Estoque por padrão
+            const estoqueMenu = document.querySelector('.menu-title[data-icon="📦"]').parentElement.querySelector('.submenu');
+            const estoqueArrow = document.querySelector('.menu-title[data-icon="📦"]').parentElement.querySelector('.arrow');
+            if (estoqueMenu) {
+                estoqueMenu.classList.add('active');
+                if (estoqueArrow) estoqueArrow.classList.add('rotated');
+            }
+        });
+    </script>
+</body>
+</html>

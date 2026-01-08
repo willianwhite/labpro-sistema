@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LabPro - Sistema Profissional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .logo {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-text {
+            transition: opacity 0.3s ease;
+            flex: 1;
+        }
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .menu-title {
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .menu-title:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .menu-title.active {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .menu-title span:first-child {
+            transition: opacity 0.3s ease;
+        }
+        .sidebar.collapsed .menu-title span:first-child {
+            font-size: 0;
+        }
+        .sidebar.collapsed .menu-title span:first-child::before {
+            content: attr(data-icon);
+            font-size: 1.5rem;
+            display: block;
+            text-align: center;
+        }
+        .sidebar.collapsed .menu-title {
+            justify-content: center;
+            padding: 0.75rem 0.5rem;
+        }
+        .submenu {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s ease;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .sidebar.collapsed .submenu {
+            display: none;
+        }
+        .menu-item {
+            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar.collapsed .arrow {
+            display: none;
+        }
+        .sidebar.collapsed .menu-item {
+            display: none;
+        }
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        .sidebar.collapsed + .main-content {
+            margin-left: 70px;
+        }
+        
+        .content-area {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .content-area:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .content-area.active {
+            display: block;
+        }
+        
+        .page-content {
+            max-width: 100%;
+        }
+        
+        .page-content h2 {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .page-content p {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .welcome {
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .welcome h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-section h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .form-control {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .top-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            margin: -2rem -2rem 2rem -2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        body.dark-theme .sidebar {
+            background: rgba(0, 0, 0, 0.5);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .top-bar {
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .stat-card,
+        body.dark-theme .page-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .menu-title {
+            color: #81C784;
+        }
+        body.dark-theme .menu-title.active {
+            background: rgba(129, 199, 132, 0.2);
+        }
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+        .content-area {
+            display: none;
+        }
+        .content-area.active {
+            display: block;
+        }
+        .welcome {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .welcome h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        .page-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .page-content h2 {
+            color: #4CAF50;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .btn-secondary {
+            background: #2196F3;
+        }
+        .btn-secondary:hover {
+            background: #1976D2;
+        }
+        .arrow {
+            transition: transform 0.3s;
+        }
+        .arrow.rotated {
+            transform: rotate(90deg);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .form-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+        .form-section h3 {
+            color: #4CAF50;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+        .btn-success {
+            background: #4CAF50;
+        }
+        .btn-success:hover {
+            background: #45a049;
+        }
+        .btn-warning {
+            background: #FF9800;
+        }
+        .btn-warning:hover {
+            background: #F57C00;
+        }
+        .service-grid {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+        .service-grid h3 {
+            color: #4CAF50;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+        .service-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .teeth-selector {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .teeth-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .tooth {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tooth:hover {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+        .tooth.selected {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+        .service-list {
+            margin-top: 1.5rem;
+        }
+        .service-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .service-item button {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .service-item button:hover {
+            background: #d32f2f;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .dashboard-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .dashboard-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dashboard-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .recent-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        
+        .item:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+        
+        .item-title {
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .item-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .item-status:nth-child(odd) {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .item-status:nth-child(even) {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .item-value {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        /* Layout da Ordem de Serviço */
+        .os-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .os-column {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .teeth-section {
+            margin-bottom: 2rem;
+        }
+        
+        .services-section {
+            margin-bottom: 2rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .teeth-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+            max-width: 600px;
+            margin: 1rem auto;
+        }
+        
+        .tooth {
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tooth:hover {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+        
+        .tooth.selected {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+        
+        .service-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span class="logo-text">🦷 LabPro</span>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        </div>
+        
+        <div class="menu-section">
+            <div class="menu-title" onclick="showPage('inicio')">
+                <span data-icon="🏠">🏠 Início</span>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="🏭">🏭 Produção</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('ordem-servico')">Ordem de Serviço</div>
+                <div class="menu-item" onclick="showPage('controle-producao')">Controle de Produção</div>
+                <div class="menu-item" onclick="showPage('agenda-producao')">Agenda de Produção</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="💰">💰 Financeiro</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('contas-receber')">Contas a Receber</div>
+                <div class="menu-item" onclick="showPage('contas-pagar')">Contas a Pagar</div>
+                <div class="menu-item" onclick="showPage('conta-bancaria')">Conta Bancaria</div>
+                <div class="menu-item" onclick="showPage('caixa-fisico')">Caixa Fisico</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📋">📋 Cadastros</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('clientes')">Clientes</div>
+                <div class="menu-item" onclick="showPage('tabela-precos')">Tabela de Preços</div>
+                <div class="menu-item" onclick="showPage('setores')">Setores</div>
+                <div class="menu-item" onclick="showPage('materiais')">Materiais Rec Dentista</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📦">📦 Estoque</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('produtos')">Produtos</div>
+                <div class="menu-item" onclick="showPage('orcamento')">Orçamento</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📊">📊 Relatórios</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('fluxo-caixa')">Fluxo de caixa</div>
+                <div class="menu-item" onclick="showPage('relatorio-producao')">Produção</div>
+                <div class="menu-item" onclick="showPage('relatorio-estoque')">Estoque</div>
+                <div class="menu-item" onclick="showPage('logs')">Logs</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="⚙️">⚙️ Configurações</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('configuracoes-gerais')">Configurações Gerais</div>
+                <div class="menu-item" onclick="showPage('usuarios')">Usuários</div>
+                <div class="menu-item" onclick="showPage('modelo-ficha')">Modelo de Ficha</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 id="pageTitle">🏠 Início</h1>
+            <div class="user-info">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeText">Dark</span>
+                </button>
+                <span id="userName">Administrador</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </div>
+
+        <!-- Página Início -->
+        <div id="inicio" class="content-area active">
+            <div class="welcome">
+                <h1>🎉 Bem-vindo ao LabPro!</h1>
+                <p>Sistema Profissional de Laboratório Dentário</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">2</div>
+                    <div>Dentistas Cadastrados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">5</div>
+                    <div>Ordens de Serviço Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div>Produção em Andamento</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">R$ 0</div>
+                    <div>Faturamento do Mês</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="dashboard-section">
+                    <h3>📋 Ordens de Serviço Recentes</h3>
+                    <div class="recent-items">
+                        <div class="item">
+                            <span class="item-title">OS-00001</span>
+                            <span class="item-status">Em Produção</span>
+                        </div>
+                        <div class="item">
+                            <span class="item-title">OS-00002</span>
+                            <span class="item-status">Aguardando</span>
+                        </div>
+                        <div class="item">
+                            <span class="item-title">OS-00003</span>
+                            <span class="item-status">Concluído</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-section">
+                    <h3>📅 Agenda do Dia</h3>
+                    <div class="recent-items">
+                        <div class="item">
+                            <span class="item-title">14:00 - Prótese</span>
+                            <span class="item-status">Pendente</span>
+                        </div>
+                        <div class="item">
+                            <span class="item-title">16:30 - Coroa</span>
+                            <span class="item-status">Em Andamento</span>
+                        </div>
+                        <div class="item">
+                            <span class="item-title">18:00 - Ortodontia</span>
+                            <span class="item-status">Agendado</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-section">
+                    <h3>💰 Financeiro Rápido</h3>
+                    <div class="recent-items">
+                        <div class="item">
+                            <span class="item-title">Receitas</span>
+                            <span class="item-value">R$ 2.500</span>
+                        </div>
+                        <div class="item">
+                            <span class="item-title">Despesas</span>
+                            <span class="item-value">R$ 800</span>
+                        </div>
+                        <div class="item">
+                            <span class="item-title">Saldo</span>
+                            <span class="item-value">R$ 1.700</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Páginas de Produção -->
+        <div id="ordem-servico" class="content-area">
+            <div class="page-content">
+                <h2>📋 Ordem de Serviço</h2>
+                
+                <div class="os-layout">
+                    <!-- Coluna Esquerda - Dados Essenciais -->
+                    <div class="os-column">
+                        <div class="form-section">
+                            <h3>📝 Dados Essenciais</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="dataLancamento">📅 Data do Lançamento</label>
+                                    <input type="date" id="dataLancamento" class="form-control" value="">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="idOS">🆔 ID da OS</label>
+                                    <input type="text" id="idOS" class="form-control" placeholder="Gerado automaticamente" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="numCaixa">📦 Número da Caixa Organizadora</label>
+                                    <input type="text" id="numCaixa" class="form-control" placeholder="Digite o número da caixa">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="nomePaciente">👤 Nome do Paciente</label>
+                                    <input type="text" id="nomePaciente" class="form-control" placeholder="Digite o nome do paciente">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cliente">🏢 Cliente</label>
+                                    <select id="cliente" class="form-control">
+                                        <option value="">Selecione um cliente</option>
+                                        <option value="1">Dra. Maria Silva</option>
+                                        <option value="2">Dr. João Santos</option>
+                                        <option value="3">Clinica Sorriso Feliz</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="observacao">📋 Observação Interna</label>
+                                <textarea id="observacao" class="form-control" rows="3" placeholder="Digite observações internas sobre esta ordem de serviço"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coluna Direita - Serviços -->
+                    <div class="os-column">
+                        <div class="form-section">
+                            <h3>🔧 Serviços</h3>
+                            
+                            <div class="service-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="categoria">📂 Categoria</label>
+                                        <select id="categoria" class="form-control">
+                                            <option value="">Selecione uma categoria</option>
+                                            <option value="protese">Prótese</option>
+                                            <option value="ortodontia">Ortodontia</option>
+                                            <option value="implante">Implante</option>
+                                            <option value="dentistica">Dentística</option>
+                                            <option value="endodontia">Endodontia</option>
+                                            <option value="periodontia">Periodontia</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="servico">⚙️ Serviço</label>
+                                        <select id="servico" class="form-control">
+                                            <option value="">Selecione um serviço</option>
+                                            <option value="coroa-total">Coroa Total</option>
+                                            <option value="coroa-parcial">Coroa Parcial</option>
+                                            <option value="ponte-fixa">Ponte Fixa</option>
+                                            <option value="protese-removivel">Prótese Removível</option>
+                                            <option value="implante-unitario">Implante Unitário</option>
+                                            <option value="clareamento">Clareamento</option>
+                                            <option value="facetaria">Facetária</option>
+                                            <option value="inlay-onlay">Inlay/Onlay</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="quantidade">🔢 Qtd</label>
+                                        <input type="number" id="quantidade" class="form-control" min="1" value="1" placeholder="Quantidade">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="valor-unit">💰 Valor Un.</label>
+                                        <input type="text" id="valor-unit" class="form-control" placeholder="R$ 0,00" onblur="formatarValor(this)">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="desconto">📉 Desc %</label>
+                                        <input type="number" id="desconto" class="form-control" min="0" max="100" value="0" placeholder="0">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="prazo-lab">⏱️ Prazo Laboratório</label>
+                                        <input type="text" id="prazo-lab" class="form-control" placeholder="Ex: 5 dias úteis">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="escala-cor">🎨 Escala/Cor</label>
+                                        <input type="text" id="escala-cor" class="form-control" placeholder="Ex: A1, B2, VITA">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="obs-servico">📝 Obs. Serviço</label>
+                                        <textarea id="obs-servico" class="form-control" rows="2" placeholder="Observações específicas"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seletor de Dentes (Full Width) -->
+                <div class="teeth-section">
+                    <div class="form-section">
+                        <h3>🦷 Selecione os Dentes</h3>
+                        <div class="teeth-grid" id="teethGrid">
+                            <!-- Dentes superiores -->
+                            <div class="tooth" onclick="toggleTooth(this, '18')">18</div>
+                            <div class="tooth" onclick="toggleTooth(this, '17')">17</div>
+                            <div class="tooth" onclick="toggleTooth(this, '16')">16</div>
+                            <div class="tooth" onclick="toggleTooth(this, '15')">15</div>
+                            <div class="tooth" onclick="toggleTooth(this, '14')">14</div>
+                            <div class="tooth" onclick="toggleTooth(this, '13')">13</div>
+                            <div class="tooth" onclick="toggleTooth(this, '12')">12</div>
+                            <div class="tooth" onclick="toggleTooth(this, '11')">11</div>
+                            
+                            <div class="tooth" onclick="toggleTooth(this, '21')">21</div>
+                            <div class="tooth" onclick="toggleTooth(this, '22')">22</div>
+                            <div class="tooth" onclick="toggleTooth(this, '23')">23</div>
+                            <div class="tooth" onclick="toggleTooth(this, '24')">24</div>
+                            <div class="tooth" onclick="toggleTooth(this, '25')">25</div>
+                            <div class="tooth" onclick="toggleTooth(this, '26')">26</div>
+                            <div class="tooth" onclick="toggleTooth(this, '27')">27</div>
+                            <div class="tooth" onclick="toggleTooth(this, '28')">28</div>
+                            
+                            <!-- Dentes inferiores -->
+                            <div class="tooth" onclick="toggleTooth(this, '48')">48</div>
+                            <div class="tooth" onclick="toggleTooth(this, '47')">47</div>
+                            <div class="tooth" onclick="toggleTooth(this, '46')">46</div>
+                            <div class="tooth" onclick="toggleTooth(this, '45')">45</div>
+                            <div class="tooth" onclick="toggleTooth(this, '44')">44</div>
+                            <div class="tooth" onclick="toggleTooth(this, '43')">43</div>
+                            <div class="tooth" onclick="toggleTooth(this, '42')">42</div>
+                            <div class="tooth" onclick="toggleTooth(this, '41')">41</div>
+                            
+                            <div class="tooth" onclick="toggleTooth(this, '31')">31</div>
+                            <div class="tooth" onclick="toggleTooth(this, '32')">32</div>
+                            <div class="tooth" onclick="toggleTooth(this, '33')">33</div>
+                            <div class="tooth" onclick="toggleTooth(this, '34')">34</div>
+                            <div class="tooth" onclick="toggleTooth(this, '35')">35</div>
+                            <div class="tooth" onclick="toggleTooth(this, '36')">36</div>
+                            <div class="tooth" onclick="toggleTooth(this, '37')">37</div>
+                            <div class="tooth" onclick="toggleTooth(this, '38')">38</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lista de Serviços Adicionados (Full Width) -->
+                <div class="services-section">
+                    <div class="form-section">
+                        <h3>📋 Serviços Adicionados</h3>
+                        <div id="servicesContainer"></div>
+                    </div>
+                </div>
+                
+                <!-- Botões de Ação -->
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="salvarOrdemServico()">
+                        💾 Salvar Ordem de Serviço
+                    </button>
+                    <button class="btn btn-secondary" onclick="limparFormulario()">
+                        🔄 Limpar Formulário
+                    </button>
+                    <button class="btn btn-warning" onclick="imprimirOS()">
+                        🖨️ Imprimir OS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="controle-producao" class="content-area">
+            <div class="page-content">
+                <h2>🏭 Controle de Produção</h2>
+                <p>Acompanhamento do status de produção</p>
+                <button class="btn">Ver Produção em Andamento</button>
+                <button class="btn btn-secondary">Histórico</button>
+            </div>
+        </div>
+
+        <div id="agenda-producao" class="content-area">
+            <div class="page-content">
+                <h2>📅 Agenda de Produção</h2>
+                <p>Agendamento de tarefas e prazos</p>
+                <button class="btn">Ver Agenda</button>
+                <button class="btn btn-secondary">Novo Agendamento</button>
+            </div>
+        </div>
+
+        <!-- Páginas Financeiro -->
+        <div id="contas-receber" class="content-area">
+            <div class="page-content">
+                <h2>💳 Contas a Receber</h2>
+                <p>Gestão de contas a receber dos clientes</p>
+                <button class="btn">Nova Conta a Receber</button>
+                <button class="btn btn-secondary">Listar Contas</button>
+            </div>
+        </div>
+
+        <div id="contas-pagar" class="content-area">
+            <div class="page-content">
+                <h2>💸 Contas a Pagar</h2>
+                <p>Gestão de contas a pagar do laboratório</p>
+                <button class="btn">Nova Conta a Pagar</button>
+                <button class="btn btn-secondary">Listar Contas</button>
+            </div>
+        </div>
+
+        <div id="conta-bancaria" class="content-area">
+            <div class="page-content">
+                <h2>🏦 Conta Bancaria</h2>
+                <p>Controle de contas bancárias</p>
+                <button class="btn">Nova Conta</button>
+                <button class="btn btn-secondary">Ver Saldos</button>
+            </div>
+        </div>
+
+        <div id="caixa-fisico" class="content-area">
+            <div class="page-content">
+                <h2>💵 Caixa Fisico</h2>
+                <p>Controle do caixa físico</p>
+                <button class="btn">Abrir Caixa</button>
+                <button class="btn btn-secondary">Ver Movimentações</button>
+            </div>
+        </div>
+
+        <!-- Páginas Cadastros -->
+        <div id="clientes" class="content-area">
+            <div class="page-content">
+                <h2>👥 Clientes</h2>
+                <p>Cadastro de dentistas e clínicas</p>
+                <button class="btn">Novo Cliente</button>
+                <button class="btn btn-secondary">Listar Clientes</button>
+            </div>
+        </div>
+
+        <div id="tabela-precos" class="content-area">
+            <div class="page-content">
+                <h2>💰 Tabela de Preços</h2>
+                <p>Gestão de preços dos serviços</p>
+                <button class="btn">Novo Preço</button>
+                <button class="btn btn-secondary">Ver Tabela</button>
+            </div>
+        </div>
+
+        <div id="setores" class="content-area">
+            <div class="page-content">
+                <h2>🏢 Setores</h2>
+                <p>Cadastro de setores do laboratório</p>
+                <button class="btn">Novo Setor</button>
+                <button class="btn btn-secondary">Listar Setores</button>
+            </div>
+        </div>
+
+        <div id="materiais" class="content-area">
+            <div class="page-content">
+                <h2>🦷 Materiais Rec Dentista</h2>
+                <p>Controle de materiais recebidos dos dentistas</p>
+                <button class="btn">Novo Material</button>
+                <button class="btn btn-secondary">Listar Materiais</button>
+            </div>
+        </div>
+
+        <!-- Páginas Estoque -->
+        <div id="produtos" class="content-area">
+            <div class="page-content">
+                <h2>📦 Produtos</h2>
+                <p>Controle de estoque de produtos</p>
+                <button class="btn">Novo Produto</button>
+                <button class="btn btn-secondary">Ver Estoque</button>
+            </div>
+        </div>
+
+        <div id="orcamento" class="content-area">
+            <div class="page-content">
+                <h2>📝 Orçamento</h2>
+                <p>Sistema de orçamentos</p>
+                <button class="btn">Novo Orçamento</button>
+                <button class="btn btn-secondary">Listar Orçamentos</button>
+            </div>
+        </div>
+
+        <!-- Páginas Relatórios -->
+        <div id="fluxo-caixa" class="content-area">
+            <div class="page-content">
+                <h2>📊 Fluxo de Caixa</h2>
+                <p>Relatório de fluxo de caixa</p>
+                <button class="btn">Gerar Relatório</button>
+                <button class="btn btn-secondary">Ver Histórico</button>
+            </div>
+        </div>
+
+        <div id="relatorio-producao" class="content-area">
+            <div class="page-content">
+                <h2>📈 Produção</h2>
+                <p>Relatórios de produção</p>
+                <button class="btn">Gerar Relatório</button>
+                <button class="btn btn-secondary">Ver Estatísticas</button>
+            </div>
+        </div>
+
+        <div id="relatorio-estoque" class="content-area">
+            <div class="page-content">
+                <h2>📦 Estoque</h2>
+                <p>Relatórios de estoque</p>
+                <button class="btn">Gerar Relatório</button>
+                <button class="btn btn-secondary">Ver Movimentações</button>
+            </div>
+        </div>
+
+        <div id="logs" class="content-area">
+            <div class="page-content">
+                <h2>📋 Logs</h2>
+                <p>Logs do sistema</p>
+                <button class="btn">Ver Logs</button>
+                <button class="btn btn-secondary">Exportar Logs</button>
+            </div>
+        </div>
+
+        <!-- Páginas Configurações -->
+        <div id="configuracoes-gerais" class="content-area">
+            <div class="page-content">
+                <h2>⚙️ Configurações Gerais</h2>
+                <p>Configurações do sistema</p>
+                <button class="btn">Editar Configurações</button>
+                <button class="btn btn-secondary">Ver Configurações</button>
+            </div>
+        </div>
+
+        <div id="usuarios" class="content-area">
+            <div class="page-content">
+                <h2>👤 Usuários</h2>
+                <p>Gestão de usuários do sistema</p>
+                <button class="btn">Novo Usuário</button>
+                <button class="btn btn-secondary">Listar Usuários</button>
+            </div>
+        </div>
+
+        <div id="modelo-ficha" class="content-area">
+            <div class="page-content">
+                <h2>📄 Modelo de Ficha</h2>
+                <p>Configuração de modelos de ficha</p>
+                <button class="btn">Novo Modelo</button>
+                <button class="btn btn-secondary">Ver Modelos</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const token = localStorage.getItem('authToken');
+        const user = localStorage.getItem('authUser');
+
+        if (!token) {
+            window.location.href = '/index.html';
+        }
+
+        if (user) {
+            const userData = JSON.parse(user);
+            document.getElementById('userName').textContent = userData.name || 'Administrador';
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            const arrow = element.querySelector('.arrow');
+            
+            // Close all other submenus
+            document.querySelectorAll('.submenu').forEach(menu => {
+                if (menu !== submenu) {
+                    menu.classList.remove('active');
+                }
+            });
+            
+            document.querySelectorAll('.arrow').forEach(a => {
+                if (a !== arrow) {
+                    a.classList.remove('rotated');
+                }
+            });
+            
+            // Toggle current submenu
+            submenu.classList.toggle('active');
+            arrow.classList.toggle('rotated');
+        }
+
+        function showPage(pageId) {
+            // Redirecionar para os novos arquivos HTML separados
+            const pageUrls = {
+                'ordem-servico': '/producao.html',
+                'controle-producao': '/producao.html',
+                'agenda-producao': '/producao.html',
+                'contas-receber': '/financeiro.html',
+                'contas-pagar': '/financeiro.html',
+                'conta-bancaria': '/financeiro.html',
+                'caixa-fisico': '/financeiro.html',
+                'clientes': '/cadastros.html',
+                'tabela-precos': '/cadastros.html',
+                'setores': '/cadastros.html',
+                'materiais': '/cadastros.html',
+                'produtos': '/estoque.html',
+                'orcamento': '/estoque.html',
+                'fluxo-caixa': '/relatorio.html',
+                'relatorio-producao': '/relatorio.html',
+                'relatorio-estoque': '/relatorio.html',
+                'logs': '/relatorio.html',
+                'configuracoes-gerais': '/configuracoes.html',
+                'usuarios': '/configuracoes.html',
+                'modelo-ficha': '/configuracoes.html'
+            };
+            
+            // Se a página tiver um URL separado, redirecionar
+            if (pageUrls[pageId]) {
+                window.location.href = pageUrls[pageId];
+                return;
+            }
+            
+            // Para páginas internas (como início), manter o comportamento original
+            document.querySelectorAll('.content-area').forEach(area => {
+                area.classList.remove('active');
+            });
+            
+            // Show selected page
+            const selectedPage = document.getElementById(pageId);
+            if (selectedPage) {
+                selectedPage.classList.add('active');
+            }
+            
+            // Update page title
+            const pageTitle = document.getElementById('pageTitle');
+            const pageNames = {
+                'inicio': '🏠 Início',
+                'ordem-servico': '📋 Ordem de Serviço',
+                'controle-producao': '🏭 Controle de Produção',
+                'agenda-producao': '📅 Agenda de Produção',
+                'contas-receber': '💳 Contas a Receber',
+                'contas-pagar': '💸 Contas a Pagar',
+                'conta-bancaria': '🏦 Conta Bancaria',
+                'caixa-fisico': '💵 Caixa Fisico',
+                'clientes': '👥 Clientes',
+                'tabela-precos': '💰 Tabela de Preços',
+                'setores': '🏢 Setores',
+                'materiais': '🦷 Materiais Rec Dentista',
+                'produtos': '📦 Produtos',
+                'orcamento': '📝 Orçamento',
+                'fluxo-caixa': '📊 Fluxo de Caixa',
+                'relatorio-producao': '📈 Produção',
+                'relatorio-estoque': '📦 Estoque',
+                'logs': '📋 Logs',
+                'configuracoes-gerais': '⚙️ Configurações Gerais',
+                'usuarios': '👤 Usuários',
+                'modelo-ficha': '📄 Modelo de Ficha'
+            };
+            
+            pageTitle.textContent = pageNames[pageId] || 'LabPro';
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-theme');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        let selectedTeeth = [];
+        let servicesList = [];
+
+        function toggleTooth(element, toothNumber) {
+            element.classList.toggle('selected');
+            
+            if (selectedTeeth.includes(toothNumber)) {
+                selectedTeeth = selectedTeeth.filter(t => t !== toothNumber);
+            } else {
+                selectedTeeth.push(toothNumber);
+            }
+        }
+
+        function formatarValor(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2);
+            input.value = 'R$ ' + value.replace('.', ',');
+        }
+
+        function adicionarServico() {
+            const categoria = document.getElementById('categoria').value;
+            const servico = document.getElementById('servico').value;
+            const quantidade = document.getElementById('quantidade').value;
+            const valorUnit = document.getElementById('valor-unit').value;
+            const desconto = document.getElementById('desconto').value;
+            const prazoLab = document.getElementById('prazo-lab').value;
+            const escalaCor = document.getElementById('escala-cor').value;
+            const obsServico = document.getElementById('obs-servico').value;
+
+            // Validação
+            if (!categoria || !servico || !quantidade || !valorUnit) {
+                alert('Por favor, preencha os campos obrigatórios!');
+                return;
+            }
+
+            if (selectedTeeth.length === 0) {
+                alert('Por favor, selecione pelo menos um dente!');
+                return;
+            }
+
+            // Calcular valor total
+            const valorNumerico = parseFloat(valorUnit.replace('R$ ', '').replace(',', '.'));
+            const valorTotal = valorNumerico * quantidade * (1 - desconto / 100);
+
+            const serviceItem = {
+                id: Date.now(),
+                categoria,
+                servico,
+                quantidade,
+                valorUnit,
+                desconto,
+                prazoLab,
+                escalaCor,
+                obsServico,
+                dentes: selectedTeeth,
+                valorTotal
+            };
+
+            servicesList.push(serviceItem);
+            renderServicesList();
+            clearServiceForm();
+        }
+
+        function renderServicesList() {
+            const container = document.getElementById('servicesContainer');
+            container.innerHTML = '';
+
+            servicesList.forEach(service => {
+                const serviceDiv = document.createElement('div');
+                serviceDiv.className = 'service-item';
+                serviceDiv.innerHTML = `
+                    <div>
+                        <strong>${service.servico}</strong> - ${service.categoria}<br>
+                        Dentes: ${service.dentes.join(', ')} | Qtd: ${service.quantidade}<br>
+                        Valor: R$ ${service.valorTotal.toFixed(2).replace('.', ',')}
+                    </div>
+                    <button onclick="removerServico(${service.id})">Remover</button>
+                `;
+                container.appendChild(serviceDiv);
+            });
+        }
+
+        function removerServico(serviceId) {
+            servicesList = servicesList.filter(s => s.id !== serviceId);
+            renderServicesList();
+        }
+
+        function clearServiceForm() {
+            document.getElementById('categoria').value = '';
+            document.getElementById('servico').value = '';
+            document.getElementById('quantidade').value = '1';
+            document.getElementById('valor-unit').value = '';
+            document.getElementById('desconto').value = '0';
+            document.getElementById('prazo-lab').value = '';
+            document.getElementById('escala-cor').value = '';
+            document.getElementById('obs-servico').value = '';
+            
+            // Limpar seleção de dentes
+            selectedTeeth = [];
+            document.querySelectorAll('.tooth').forEach(tooth => {
+                tooth.classList.remove('selected');
+            });
+        }
+
+        async function salvarOrdemServico() {
+            const data = {
+                patientName: document.getElementById('nomePaciente').value,
+                dentistId: parseInt(document.getElementById('cliente').value),
+                boxNumber: document.getElementById('numCaixa').value,
+                internalNotes: document.getElementById('observacao').value,
+                services: servicesList,
+                totalValue: servicesList.reduce((sum, s) => sum + s.valorTotal, 0)
+            };
+            
+            // Validação básica
+            if (!data.patientName || !data.boxNumber || !data.dentistId) {
+                alert('Por favor, preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            if (servicesList.length === 0) {
+                alert('Por favor, adicione pelo menos um serviço!');
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Ordem de Serviço salva com sucesso!');
+                    limparFormulario();
+                } else {
+                    const error = await response.text();
+                    alert('Erro ao salvar: ' + error);
+                }
+            } catch (error) {
+                alert('Erro de conexão. Verifique se a API está rodando.');
+            }
+        }
+        
+        function limparFormulario() {
+            document.getElementById('dataLancamento').value = new Date().toISOString().split('T')[0];
+            document.getElementById('idOS').value = '';
+            document.getElementById('numCaixa').value = '';
+            document.getElementById('nomePaciente').value = '';
+            document.getElementById('cliente').value = '';
+            document.getElementById('observacao').value = '';
+            
+            // Limpar serviços
+            servicesList = [];
+            selectedTeeth = [];
+            renderServicesList();
+            clearServiceForm();
+            
+            gerarNovoID();
+        }
+        
+        function imprimirOS() {
+            alert('Função de impressão será implementada!');
+        }
+        
+        async function gerarNovoID() {
+            // Verificar cache primeiro
+            const cachedId = localStorage.getItem('nextOrderId');
+            const cacheTime = localStorage.getItem('orderIdCacheTime');
+            const now = Date.now();
+            
+            // Usar cache se tiver menos de 5 minutos
+            if (cachedId && cacheTime && (now - parseInt(cacheTime)) < 300000) {
+                document.getElementById('idOS').value = cachedId;
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch('/api/orders/dashboard/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    const nextNumber = (stats.TotalOrders || 0) + 1;
+                    const nextId = nextNumber.toString().padStart(5, '0');
+                    
+                    // Salvar em cache
+                    localStorage.setItem('nextOrderId', nextId);
+                    localStorage.setItem('orderIdCacheTime', now.toString());
+                    
+                    document.getElementById('idOS').value = nextId;
+                } else {
+                    // Fallback se API falhar
+                    const fallbackId = '00001';
+                    localStorage.setItem('nextOrderId', fallbackId);
+                    localStorage.setItem('orderIdCacheTime', now.toString());
+                    document.getElementById('idOS').value = fallbackId;
+                }
+            } catch (error) {
+                // Fallback se API falhar
+                const fallbackId = localStorage.getItem('nextOrderId') || '00001';
+                document.getElementById('idOS').value = fallbackId;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            window.location.href = '/index.html';
+        }
+
+        // Initialize with Início page
+        showPage('inicio');
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            document.getElementById('themeIcon').textContent = '☀️';
+            document.getElementById('themeText').textContent = 'Light';
+        }
+        
+        // Set today's date and generate OS ID
+        document.getElementById('dataLancamento').value = new Date().toISOString().split('T')[0];
+        gerarNovoID();
+    </script>
+</body>
+</html>

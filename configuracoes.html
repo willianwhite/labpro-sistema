@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - LabPro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .logo {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-text {
+            transition: opacity 0.3s ease;
+            flex: 1;
+        }
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .menu-title {
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .menu-title:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .menu-title.active {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .menu-title span:first-child {
+            transition: opacity 0.3s ease;
+        }
+        .sidebar.collapsed .menu-title span:first-child {
+            font-size: 0;
+        }
+        .sidebar.collapsed .menu-title span:first-child::before {
+            content: attr(data-icon);
+            font-size: 1.5rem;
+            display: block;
+            text-align: center;
+        }
+        .sidebar.collapsed .menu-title {
+            justify-content: center;
+            padding: 0.75rem 0.5rem;
+        }
+        .submenu {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s ease;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .sidebar.collapsed .submenu {
+            display: none;
+        }
+        .menu-item {
+            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar.collapsed .arrow {
+            display: none;
+        }
+        .sidebar.collapsed .menu-item {
+            display: none;
+        }
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+        .sidebar.collapsed + .main-content {
+            margin-left: 70px;
+        }
+        .top-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            margin: -2rem -2rem 2rem -2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        body.dark-theme .sidebar {
+            background: rgba(0, 0, 0, 0.5);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .top-bar {
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .stat-card,
+        body.dark-theme .page-content,
+        body.dark-theme .form-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .menu-title {
+            color: #81C784;
+        }
+        body.dark-theme .menu-title.active {
+            background: rgba(129, 199, 132, 0.2);
+        }
+        body.dark-theme .form-group input,
+        body.dark-theme .form-group select,
+        body.dark-theme .form-group textarea {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        body.dark-theme .form-group label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .config-card,
+        body.dark-theme .user-card,
+        body.dark-theme .template-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .config-card h3,
+        body.dark-theme .user-card h3,
+        body.dark-theme .template-card h4 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .user-info .user-name {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .user-info .user-role {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        body.dark-theme .user-info .user-email {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        body.dark-theme .user-avatar {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        body.dark-theme .template-description {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        body.dark-theme .toggle-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .status-indicator {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .nav-tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .nav-tab:hover {
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .config-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .config-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .config-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: inline-block;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            right: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .toggle-switch input:checked {
+            background: #667eea;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .status-online {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .status-offline {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .user-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .user-info h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .user-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            color: #666;
+            min-width: 80px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .action-btn.edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .action-btn.reset {
+            background: #ffa500;
+            color: white;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .template-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .template-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .template-card h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .template-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+
+        .template-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .template-stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .config-grid,
+            .users-grid,
+            .templates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span class="logo-text">🦷 LabPro</span>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        </div>
+        
+        <div class="menu-section">
+            <div class="menu-title" onclick="showPage('inicio')">
+                <span data-icon="🏠">🏠 Início</span>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="🏭">🏭 Produção</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('ordem-servico')">Ordem de Serviço</div>
+                <div class="menu-item" onclick="showPage('controle-producao')">Controle de Produção</div>
+                <div class="menu-item" onclick="showPage('agenda-producao')">Agenda de Produção</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="💰">💰 Financeiro</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('contas-receber')">Contas a Receber</div>
+                <div class="menu-item" onclick="showPage('contas-pagar')">Contas a Pagar</div>
+                <div class="menu-item" onclick="showPage('conta-bancaria')">Conta Bancaria</div>
+                <div class="menu-item" onclick="showPage('caixa-fisico')">Caixa Fisico</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📋">📋 Cadastros</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('clientes')">Clientes</div>
+                <div class="menu-item" onclick="showPage('tabela-precos')">Tabela de Preços</div>
+                <div class="menu-item" onclick="showPage('setores')">Setores</div>
+                <div class="menu-item" onclick="showPage('materiais')">Materiais Rec Dentista</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📦">📦 Estoque</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('produtos')">Produtos</div>
+                <div class="menu-item" onclick="showPage('orcamento')">Orçamento</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📊">📊 Relatórios</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('fluxo-caixa')">Fluxo de caixa</div>
+                <div class="menu-item" onclick="showPage('relatorio-producao')">Produção</div>
+                <div class="menu-item" onclick="showPage('relatorio-estoque')">Estoque</div>
+                <div class="menu-item" onclick="showPage('logs')">Logs</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="⚙️">⚙️ Configurações</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('configuracoes-gerais')">Configurações Gerais</div>
+                <div class="menu-item" onclick="showPage('usuarios')">Usuários</div>
+                <div class="menu-item" onclick="showPage('modelo-ficha')">Modelo de Ficha</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 id="pageTitle">⚙️ Configurações</h1>
+            <div class="user-info">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeText">Dark</span>
+                </button>
+                <span id="userName">Administrador</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </div>
+        <!-- Navegação entre abas -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('configuracoes-gerais')">
+                ⚙️ Configurações Gerais
+            </button>
+            <button class="nav-tab" onclick="showTab('usuarios')">
+                👤 Usuários
+            </button>
+            <button class="nav-tab" onclick="showTab('modelo-ficha')">
+                📄 Modelo de Ficha
+            </button>
+        </div>
+
+        <!-- Aba Configurações Gerais -->
+        <div id="configuracoes-gerais" class="tab-content active">
+            <div class="config-grid">
+                <div class="config-card">
+                    <h3>🏢 Dados da Empresa</h3>
+                    <div class="form-group">
+                        <label for="empresaNome">Nome da Empresa</label>
+                        <input type="text" id="empresaNome" value="LabPro Laboratório Dental">
+                    </div>
+                    <div class="form-group">
+                        <label for="empresaCnpj">CNPJ</label>
+                        <input type="text" id="empresaCnpj" value="12.345.678/0001-90">
+                    </div>
+                    <div class="form-group">
+                        <label for="empresaTelefone">Telefone</label>
+                        <input type="text" id="empresaTelefone" value="(11) 9876-5432">
+                    </div>
+                    <div class="form-group">
+                        <label for="empresaEmail">E-mail</label>
+                        <input type="email" id="empresaEmail" value="contato@labpro.com.br">
+                    </div>
+                    <div class="form-group">
+                        <label for="empresaEndereco">Endereço</label>
+                        <textarea id="empresaEndereco">Rua das Flores, 123 - Centro - São Paulo - SP - CEP: 01234-567</textarea>
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <h3>🔧 Configurações do Sistema</h3>
+                    <div class="form-group">
+                        <label for="sistemaNome">Nome do Sistema</label>
+                        <input type="text" id="sistemaNome" value="LabPro Sistema">
+                    </div>
+                    <div class="form-group">
+                        <label for="sistemaVersao">Versão</label>
+                        <input type="text" id="sistemaVersao" value="1.0.0" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="timezone">Fuso Horário</label>
+                        <select id="timezone">
+                            <option value="America/Sao_Paulo">America/São Paulo (GMT-3)</option>
+                            <option value="America/New_York">America/New York (GMT-5)</option>
+                            <option value="Europe/London">Europe/London (GMT+0)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="idioma">Idioma Padrão</label>
+                        <select id="idioma">
+                            <option value="pt-BR">Português (Brasil)</option>
+                            <option value="en-US">English (United States)</option>
+                            <option value="es-ES">Español (España)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            Modo de Manutenção
+                            <span class="status-indicator status-offline">Inativo</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="modoManutencao">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <h3>🔔 Notificações</h3>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            Notificações por E-mail
+                            <span class="status-indicator status-online">Ativo</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="emailNotifications" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            Notificações de Sistema
+                            <span class="status-indicator status-online">Ativo</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="systemNotifications" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailAdmin">E-mail do Administrador</label>
+                        <input type="email" id="emailAdmin" value="admin@labpro.com.br">
+                    </div>
+                    <div class="form-group">
+                        <label for="notificacoesVencimento">Dias para Aviso de Vencimento</label>
+                        <input type="number" id="notificacoesVencimento" value="7" min="1" max="30">
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <h3>💾 Backup e Segurança</h3>
+                    <div class="form-group">
+                        <label class="toggle-label">
+                            Backup Automático
+                            <span class="status-indicator status-online">Ativo</span>
+                        </label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="backupAutomatico" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="backupFrequencia">Frequência do Backup</label>
+                        <select id="backupFrequencia">
+                            <option value="daily">Diário</option>
+                            <option value="weekly">Semanal</option>
+                            <option value="monthly">Mensal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="backupLocal">Local do Backup</label>
+                        <input type="text" id="backupLocal" value="/backups/labpro">
+                    </div>
+                    <div class="form-group">
+                        <label for="sessionTimeout">Timeout de Sessão (minutos)</label>
+                        <input type="number" id="sessionTimeout" value="30" min="5" max="480">
+                    </div>
+                    <div class="form-group">
+                        <label for="maxLoginTentativas">Máximas Tentativas de Login</label>
+                        <input type="number" id="maxLoginTentativas" value="5" min="3" max="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="salvarConfiguracoes()">
+                    <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+                <button class="btn btn-secondary" onclick="restaurarPadrao()">
+                    <i class="fas fa-undo"></i> Restaurar Padrão
+                </button>
+                <button class="btn btn-danger" onclick="limparCache()">
+                    <i class="fas fa-trash"></i> Limpar Cache
+                </button>
+            </div>
+        </div>
+
+        <!-- Aba Usuários -->
+        <div id="usuarios" class="tab-content">
+            <div class="section-header">
+                <h2>👤 Usuários</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="novoUsuario()">
+                        <i class="fas fa-plus"></i> Novo Usuário
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportarUsuarios()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                </div>
+            </div>
+
+            <div class="users-grid">
+                <div class="user-card">
+                    <div class="user-header">
+                        <div class="user-avatar">JD</div>
+                        <div class="user-info">
+                            <h4>Dr. João Santos</h4>
+                            <p>👤 joao.santos@exemplo.com</p>
+                            <p>📱 (11) 98765-4321</p>
+                            <p>🏢 São Paulo - SP</p>
+                        </div>
+                    </div>
+                    <div class="user-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Cargo:</span>
+                            <span class="detail-value">Dentista</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Cadastro:</span>
+                            <span class="detail-value">15/10/2024</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Último Acesso:</span>
+                            <span class="detail-value">Hoje, 14:30</span>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="action-btn edit" onclick="editarUsuario('001')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn reset" onclick="resetarSenha('001')">
+                            <i class="fas fa-key"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="bloquearUsuario('001')">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="user-card">
+                    <div class="user-header">
+                        <div class="user-avatar">MS</div>
+                        <div class="user-info">
+                            <h4>Dra. Maria Silva</h4>
+                            <p>👤 maria.silva@exemplo.com</p>
+                            <p>📱 (11) 91234-5678</p>
+                            <p>🏢 São Paulo - SP</p>
+                        </div>
+                    </div>
+                    <div class="user-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Cargo:</span>
+                            <span class="detail-value">Administrador</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Cadastro:</span>
+                            <span class="detail-value">01/11/2024</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Último Acesso:</span>
+                            <span class="detail-value">Hoje, 16:45</span>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="action-btn edit" onclick="editarUsuario('002')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn reset" onclick="resetarSenha('002')">
+                            <i class="fas fa-key"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="bloquearUsuario('002')">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Modelo de Ficha -->
+        <div id="modelo-ficha" class="tab-content">
+            <div class="section-header">
+                <h2>📄 Modelo de Ficha</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="novoModelo()">
+                        <i class="fas fa-plus"></i> Novo Modelo
+                    </button>
+                    <button class="btn btn-secondary" onclick="importarModelo()">
+                        <i class="fas fa-upload"></i> Importar
+                    </button>
+                </div>
+            </div>
+
+            <div class="templates-grid">
+                <div class="template-card" onclick="editarModelo('001')">
+                    <h4>🦷 Ficha Padrão - Protese</h4>
+                    <div class="template-description">
+                        Modelo padrão para fichas de prótese com campos essenciais para documentação de ordens de serviço.
+                    </div>
+                    <div class="template-meta">
+                        <div class="template-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">245</div>
+                                <div class="stat-label">Usos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">4.8</div>
+                                <div class="stat-label">Média/mês</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-copy"></i> Duplicar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="template-card" onclick="editarModelo('002')">
+                    <h4>🦷 Ficha Ortodôntica</h4>
+                    <div class="template-description">
+                        Modelo específico para documentação de tratamentos ortodônticos com campos para evolução do paciente.
+                    </div>
+                    <div class="template-meta">
+                        <div class="template-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">89</div>
+                                <div class="stat-label">Usos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">2.3</div>
+                                <div class="stat-label">Média/mês</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-copy"></i> Duplicar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="template-card" onclick="editarModelo('003')">
+                    <h4>🦷 Ficha Implante</h4>
+                    <div class="template-description">
+                        Modelo completo para fichas de implante com campos para planejamento, cirurgia e acompanhamento do caso.
+                    </div>
+                    <div class="template-meta">
+                        <div class="template-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">34</div>
+                                <div class="stat-label">Usos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">1.2</div>
+                                <div class="stat-label">Média/mês</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-copy"></i> Duplicar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar data atual
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.textContent = now.toLocaleDateString('pt-BR', options);
+            }
+        }
+
+        // Funções de navegação
+        function showTab(tabId) {
+            // Esconder todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remover classe ativo de todos os botões
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar aba selecionada
+            document.getElementById(tabId).classList.add('active');
+            
+            // Adicionar classe ativo ao botão selecionado
+            event.target.classList.add('active');
+        }
+
+        // Funções do menu lateral
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            const arrow = element.querySelector('.arrow');
+            
+            // Fechar outros submenus
+            document.querySelectorAll('.submenu').forEach(menu => {
+                if (menu !== submenu) {
+                    menu.classList.remove('active');
+                }
+            });
+            
+            document.querySelectorAll('.arrow').forEach(a => {
+                if (a !== arrow) {
+                    a.classList.remove('rotated');
+                }
+            });
+            
+            // Toggle current submenu
+            submenu.classList.toggle('active');
+            arrow.classList.toggle('rotated');
+        }
+
+        function showPage(pageId) {
+            // Para páginas do mesmo módulo, mostrar abas internas
+            const internalPages = ['configuracoes-gerais', 'usuarios', 'modelo-ficha'];
+            if (internalPages.includes(pageId)) {
+                showTab(pageId);
+                return;
+            }
+            
+            // Redirecionar para os novos arquivos HTML separados
+            const pageUrls = {
+                'ordem-servico': '/producao.html',
+                'controle-producao': '/producao.html',
+                'agenda-producao': '/producao.html',
+                'contas-receber': '/financeiro.html',
+                'contas-pagar': '/financeiro.html',
+                'conta-bancaria': '/financeiro.html',
+                'caixa-fisico': '/financeiro.html',
+                'clientes': '/cadastros.html',
+                'tabela-precos': '/cadastros.html',
+                'setores': '/cadastros.html',
+                'materiais': '/cadastros.html',
+                'produtos': '/estoque.html',
+                'orcamento': '/estoque.html',
+                'fluxo-caixa': '/relatorio.html',
+                'relatorio-producao': '/relatorio.html',
+                'relatorio-estoque': '/relatorio.html',
+                'logs': '/relatorio.html'
+            };
+            
+            // Se a página tiver um URL separado, redirecionar
+            if (pageUrls[pageId]) {
+                window.location.href = pageUrls[pageId];
+                return;
+            }
+            
+            // Para página início, redirecionar para o dashboard
+            if (pageId === 'inicio') {
+                window.location.href = '/dashboard.html';
+                return;
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-theme');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            // Salvar tema em todas as páginas
+            localStorage.setItem('labpro-theme', body.classList.contains('dark-theme') ? 'dark' : 'light');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            window.location.href = '/index.html';
+        }
+
+        // Funções de interação
+        function salvarConfiguracoes() {
+            alert('Configurações salvas com sucesso!');
+        }
+
+        function restaurarPadrao() {
+            if (confirm('Deseja restaurar todas as configuracoes para o padrao?')) {
+                alert('Configuracoes restauradas para o padrao');
+            }
+        }
+
+        function limparCache() {
+            if (confirm('Deseja limpar o cache do sistema? Isso pode melhorar o desempenho.')) {
+                alert('Cache do sistema limpo com sucesso!');
+            }
+        }
+
+        function novoUsuario() {
+            alert('Abrir formulário para novo usuario');
+        }
+
+        function editarUsuario(id) {
+            alert('Editar usuario ' + id);
+        }
+
+        function resetarSenha(id) {
+            if (confirm('Deseja resetar a senha do usuario ' + id + '?')) {
+                alert('Senha do usuario ' + id + ' resetada com sucesso!');
+            }
+        }
+
+        function bloquearUsuario(id) {
+            if (confirm('Deseja bloquear o usuario ' + id + '?')) {
+                alert('Usuario ' + id + ' bloqueado com sucesso!');
+            }
+        }
+
+        function exportarUsuarios() {
+            alert('Exportar lista de usuarios');
+        }
+
+        function novoModelo() {
+            alert('Abrir formulário para novo modelo');
+        }
+
+        function editarModelo(id) {
+            alert('Editar modelo ' + id);
+        }
+
+        function importarModelo() {
+            alert('Importar modelo de arquivo');
+        }
+
+        // Toggle switches
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDate();
+            setInterval(updateDate, 60000);
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Light';
+            }
+            
+            // Expandir menu Configurações por padrão
+            const configuracoesMenu = document.querySelector('.menu-title[data-icon="⚙️"]').parentElement.querySelector('.submenu');
+            const configuracoesArrow = document.querySelector('.menu-title[data-icon="⚙️"]').parentElement.querySelector('.arrow');
+            if (configuracoesMenu) {
+                configuracoesMenu.classList.add('active');
+                if (configuracoesArrow) configuracoesArrow.classList.add('rotated');
+            }
+            
+            // Toggle switches
+            const toggleSwitches = document.querySelectorAll('.toggle-switch input');
+            toggleSwitches.forEach(toggle => {
+                toggle.addEventListener('change', function() {
+                    const status = this.checked ? 'Ativo' : 'Inativo';
+                    const statusClass = this.checked ? 'status-online' : 'status-offline';
+                    const statusElement = this.closest('.toggle-label').querySelector('.status-indicator');
+                    if (statusElement) {
+                        statusElement.className = 'status-indicator ' + statusClass;
+                        statusElement.textContent = status;
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="shared.js"></script>
+</body>
+</html>

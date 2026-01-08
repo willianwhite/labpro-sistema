@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuários - LabPro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .user-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .user-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-info h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .user-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .status-inactive {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .status-blocked {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+        }
+
+        .user-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-label {
+            color: #666;
+            min-width: 80px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .action-btn.edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .action-btn.reset {
+            background: #ffa500;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-actions {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👤 Usuários</h1>
+        <div class="user-info">
+            <span>👤 Administrador</span>
+            <span>📅 <span id="currentDate"></span></span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Ações e Pesquisa -->
+        <div class="user-actions">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Pesquisar usuários...">
+            </div>
+            <button class="btn btn-primary" onclick="novoUsuario()">
+                <i class="fas fa-plus"></i> Novo Usuário
+            </button>
+            <button class="btn btn-secondary" onclick="exportarUsuarios()">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">15</div>
+                <div class="stat-label">Total de Usuários</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Usuários Ativos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Novos este Mês</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">2</div>
+                <div class="stat-label">Bloqueados</div>
+            </div>
+        </div>
+
+        <!-- Lista de Usuários -->
+        <div class="users-grid">
+            <div class="user-card">
+                <div class="user-header">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-info">
+                        <h4>Dr. João Santos</h4>
+                        <p>👤 joao.santos@exemplo.com</p>
+                        <p>📱 (11) 98765-4321</p>
+                        <p>🏢 São Paulo - SP</p>
+                    </div>
+                    <div class="user-status status-active">Ativo</div>
+                </div>
+                <div class="user-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Cargo:</span>
+                        <span class="detail-value">Dentista</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Cadastro:</span>
+                        <span class="detail-value">15/10/2024</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Último Acesso:</span>
+                        <span class="detail-value">Hoje, 14:30</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button class="action-btn edit" onclick="editarUsuario('001')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn reset" onclick="resetarSenha('001')">
+                        <i class="fas fa-key"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="bloquearUsuario('001')">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="user-card">
+                <div class="user-header">
+                    <div class="user-avatar">MS</div>
+                    <div class="user-info">
+                        <h4>Dra. Maria Silva</h4>
+                        <p>👤 maria.silva@exemplo.com</p>
+                        <p>📱 (11) 91234-5678</p>
+                        <p>🏢 São Paulo - SP</p>
+                    </div>
+                    <div class="user-status status-active">Ativo</div>
+                </div>
+                <div class="user-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Cargo:</span>
+                        <span class="detail-value">Administrador</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Cadastro:</span>
+                        <span class="detail-value">01/11/2024</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Último Acesso:</span>
+                        <span class="detail-value">Hoje, 16:45</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button class="action-btn edit" onclick="editarUsuario('002')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn reset" onclick="resetarSenha('002')">
+                        <i class="fas fa-key"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="bloquearUsuario('002')">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="user-card">
+                <div class="user-header">
+                    <div class="user-avatar">CS</div>
+                    <div class="user-info">
+                        <h4>Clinica Sorriso Feliz</h4>
+                        <p>👤 contato@clinicasorriso.com.br</p>
+                        <p>📱 (11) 34567-8901</p>
+                        <p>🏢 Rio de Janeiro - RJ</p>
+                    </div>
+                    <div class="user-status status-active">Ativo</div>
+                </div>
+                <div class="user-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Cargo:</span>
+                        <span class="detail-value">Cliente</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Cadastro:</span>
+                        <span class="detail-value">20/11/2024</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Último Acesso:</span>
+                        <span class="detail-value">Ontem, 09:15</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button class="action-btn edit" onclick="editarUsuario('003')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn reset" onclick="resetarSenha('003')">
+                        <i class="fas fa-key"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="bloquearUsuario('003')">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="user-card">
+                <div class="user-header">
+                    <div class="user-avatar">RF</div>
+                    <div class="user-info">
+                        <h4>Roberto Ferreira</h4>
+                        <p>👤 roberto.ferreira@exemplo.com</p>
+                        <p>📱 (11) 87654-3210</p>
+                        <p>🏢 Belo Horizonte - MG</p>
+                    </div>
+                    <div class="user-status status-blocked">Bloqueado</div>
+                </div>
+                <div class="user-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Cargo:</span>
+                        <span class="detail-value">Técnico</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Cadastro:</span>
+                        <span class="detail-value">10/11/2024</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Último Acesso:</span>
+                        <span class="detail-value">05/12/2024</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <button class="action-btn edit" onclick="editarUsuario('004')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="bloquearUsuario('004')">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                    <button class="action-btn reset" onclick="desbloquearUsuario('004')">
+                        <i class="fas fa-unlock"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar data atual
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', options);
+        }
+
+        // Função de pesquisa
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const userCards = document.querySelectorAll('.user-card');
+            
+            userCards.forEach(card => {
+                const userInfo = card.querySelector('.user-info');
+                const text = userInfo.textContent.toLowerCase();
+                
+                if (text.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Funções de interação
+        function novoUsuario() {
+            alert('Abrir formulário para novo usuário');
+        }
+
+        function editarUsuario(id) {
+            alert(`Editar usuário ${id}`);
+        }
+
+        function resetarSenha(id) {
+            if (confirm(`Deseja resetar a senha do usuário ${id}?`)) {
+                alert(`Senha do usuário ${id} resetada com sucesso!`);
+            }
+        }
+
+        function bloquearUsuario(id) {
+            if (confirm(`Deseja bloquear o usuário ${id}?`)) {
+                alert(`Usuário ${id} bloqueado com sucesso!`);
+            }
+        }
+
+        function desbloquearUsuario(id) {
+            if (confirm(`Deseja desbloquear o usuário ${id}?`)) {
+                alert(`Usuário ${id} desbloqueado com sucesso!`);
+            }
+        }
+
+        function exportarUsuarios() {
+            alert('Exportar lista de usuários');
+        }
+
+        // Inicialização
+        updateDate();
+        setInterval(updateDate, 60000); // Atualizar a cada minuto
+    </script>
+</body>
+</html>

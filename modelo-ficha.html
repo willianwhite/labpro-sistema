@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelo de Ficha - LabPro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .template-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .template-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .template-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .template-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .template-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+
+        .template-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .template-stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .template-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .action-btn.edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.duplicate {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .action-btn.use {
+            background: #4caf50;
+            color: white;
+        }
+
+        .preview-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .preview-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .preview-content {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 300px;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .templates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .template-actions {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📄 Modelo de Ficha</h1>
+        <div class="user-info">
+            <span>👤 Administrador</span>
+            <span>📅 <span id="currentDate"></span></span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Ações e Pesquisa -->
+        <div class="template-actions">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Pesquisar modelos...">
+            </div>
+            <button class="btn btn-primary" onclick="novoModelo()">
+                <i class="fas fa-plus"></i> Novo Modelo
+            </button>
+            <button class="btn btn-secondary" onclick="importarModelo()">
+                <i class="fas fa-upload"></i> Importar
+            </button>
+        </div>
+
+        <!-- Lista de Modelos -->
+        <div class="templates-grid">
+            <div class="template-card" onclick="editarModelo('001')">
+                <h3>🦷 Ficha Padrão - Protese</h3>
+                <div class="template-description">
+                    Modelo padrão para fichas de prótese com campos essenciais para documentação de ordens de serviço.
+                </div>
+                <div class="template-meta">
+                    <div class="template-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">245</div>
+                            <div class="stat-label">Usos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">4.8</div>
+                            <div class="stat-label">Média/mês</div>
+                        </div>
+                    </div>
+                    <div class="template-actions">
+                        <button class="action-btn edit" onclick="editarModelo('001')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn duplicate" onclick="duplicarModelo('001')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="excluirModelo('001')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="action-btn use" onclick="usarModelo('001')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="template-card" onclick="editarModelo('002')">
+                <h3>🦷 Ficha Ortodôntica</h3>
+                <div class="template-description">
+                    Modelo específico para documentação de tratamentos ortodônticos com campos para evolução do paciente.
+                </div>
+                <div class="template-meta">
+                    <div class="template-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">89</div>
+                            <div class="stat-label">Usos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">2.3</div>
+                            <div class="stat-label">Média/mês</div>
+                        </div>
+                    </div>
+                    <div class="template-actions">
+                        <button class="action-btn edit" onclick="editarModelo('002')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn duplicate" onclick="duplicarModelo('002')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="excluirModelo('002')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="action-btn use" onclick="usarModelo('002')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="template-card" onclick="editarModelo('003')">
+                <h3>🦷 Ficha Implante</h3>
+                <div class="template-description">
+                    Modelo completo para fichas de implante com campos para planejamento, cirurgia e acompanhamento do caso.
+                </div>
+                <div class="template-meta">
+                    <div class="template-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">34</div>
+                            <div class="stat-label">Usos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">1.2</div>
+                            <div class="stat-label">Média/mês</div>
+                        </div>
+                    </div>
+                    <div class="template-actions">
+                        <button class="action-btn edit" onclick="editarModelo('003')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn duplicate" onclick="duplicarModelo('003')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="excluirModelo('003')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="action-btn use" onclick="usarModelo('003')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="template-card" onclick="editarModelo('004')">
+                <h3>🦷 Ficha Dentística</h3>
+                <div class="template-description">
+                    Modelo para documentação de procedimentos dentísticos restauradores e estéticos.
+                </div>
+                <div class="template-meta">
+                    <div class="template-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">156</div>
+                            <div class="stat-label">Usos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">6.7</div>
+                            <div class="stat-label">Média/mês</div>
+                        </div>
+                    </div>
+                    <div class="template-actions">
+                        <button class="action-btn edit" onclick="editarModelo('004')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn duplicate" onclick="duplicarModelo('004')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="excluirModelo('004')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="action-btn use" onclick="usarModelo('004')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualização do Modelo -->
+        <div class="preview-container" id="previewContainer" style="display: none;">
+            <div class="preview-header">
+                <h3 class="preview-title">Visualização do Modelo</h3>
+                <button class="preview-close" onclick="fecharPreview()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="preview-content">
+                <div class="form-section">
+                    <h4>Configurações do Modelo</h4>
+                    <div class="form-group">
+                        <label for="templateName">Nome do Modelo</label>
+                        <input type="text" id="templateName" value="Ficha Padrão - Protese">
+                    </div>
+                    <div class="form-group">
+                        <label for="templateDescription">Descrição</label>
+                        <textarea id="templateDescription">Modelo padrão para fichas de prótese com campos essenciais para documentação de ordens de serviço.</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="templateFields">Campos Personalizados</label>
+                        <textarea id="templateFields" placeholder="Defina os campos do modelo..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário de Novo Modelo -->
+        <div class="form-section" id="formSection" style="display: none;">
+            <h3>📝 Novo Modelo</h3>
+            <div class="form-group">
+                <label for="newTemplateName">Nome do Modelo</label>
+                <input type="text" id="newTemplateName" placeholder="Ex: Ficha Padrão - Protese">
+            </div>
+            <div class="form-group">
+                <label for="newTemplateDescription">Descrição</label>
+                <textarea id="newTemplateDescription" placeholder="Descreva o propósito do modelo..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="newTemplateFields">Campos (um por linha)</label>
+                <textarea id="newTemplateFields" placeholder="Nome do Campo;Tipo do Campo;Obrigatório"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="templateType">Tipo de Ficha</label>
+                <select id="templateType">
+                    <option value="protese">Prótese</option>
+                    <option value="ortodontia">Ortodontia</option>
+                    <option value="implante">Implante</option>
+                    <option value="dentistica">Dentística</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+            <div class="template-actions">
+                <button class="btn btn-primary" onclick="salvarModelo()">
+                    <i class="fas fa-save"></i> Salvar Modelo
+                </button>
+                <button class="btn btn-secondary" onclick="cancelarModelo()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar data atual
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', options);
+        }
+
+        // Função de pesquisa
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const templateCards = document.querySelectorAll('.template-card');
+            
+            templateCards.forEach(card => {
+                const templateInfo = card.querySelector('.template-description');
+                const text = templateInfo.textContent.toLowerCase();
+                
+                if (text.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Funções de interação
+        function novoModelo() {
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('previewContainer').style.display = 'none';
+        }
+
+        function editarModelo(id) {
+            alert(`Editar modelo ${id}`);
+        }
+
+        function duplicarModelo(id) {
+            alert(`Duplicar modelo ${id}`);
+        }
+
+        function excluirModelo(id) {
+            if (confirm(`Deseja excluir o modelo ${id}? Esta ação não pode ser desfeita.`)) {
+                alert(`Modelo ${id} excluído com sucesso!`);
+            }
+        }
+
+        function usarModelo(id) {
+            alert(`Usando modelo ${id}`);
+        }
+
+        function importarModelo() {
+            alert('Importar modelo de arquivo');
+        }
+
+        function fecharPreview() {
+            document.getElementById('previewContainer').style.display = 'none';
+        }
+
+        function cancelarModelo() {
+            document.getElementById('formSection').style.display = 'none';
+        }
+
+        function salvarModelo() {
+            const name = document.getElementById('newTemplateName').value;
+            const description = document.getElementById('newTemplateDescription').value;
+            const fields = document.getElementById('newTemplateFields').value;
+            const type = document.getElementById('templateType').value;
+            
+            if (!name || !description || !fields) {
+                alert('Por favor, preencha todos os campos obrigatórios!');
+                return;
+            }
+            
+            alert(`Modelo "${name}" salvo com sucesso!`);
+            document.getElementById('formSection').style.display = 'none';
+        }
+
+        // Inicialização
+        updateDate();
+        setInterval(updateDate, 60000); // Atualizar a cada minuto
+    </script>
+</body>
+</html>

@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - LabPro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .logo {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-text {
+            transition: opacity 0.3s ease;
+            flex: 1;
+        }
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .menu-title {
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .menu-title:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .menu-title.active {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .menu-title span:first-child {
+            transition: opacity 0.3s ease;
+        }
+        .sidebar.collapsed .menu-title span:first-child {
+            font-size: 0;
+        }
+        .sidebar.collapsed .menu-title span:first-child::before {
+            content: attr(data-icon);
+            font-size: 1.5rem;
+            display: block;
+            text-align: center;
+        }
+        .sidebar.collapsed .menu-title {
+            justify-content: center;
+            padding: 0.75rem 0.5rem;
+        }
+        .submenu {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s ease;
+        }
+        .submenu.active {
+            display: block;
+        }
+        .sidebar.collapsed .submenu {
+            display: none;
+        }
+        .menu-item {
+            padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar.collapsed .arrow {
+            display: none;
+        }
+        .sidebar.collapsed .menu-item {
+            display: none;
+        }
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+        .sidebar.collapsed + .main-content {
+            margin-left: 70px;
+        }
+        .top-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            margin: -2rem -2rem 2rem -2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        body.dark-theme .sidebar {
+            background: rgba(0, 0, 0, 0.5);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .top-bar {
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .stat-card,
+        body.dark-theme .page-content,
+        body.dark-theme .form-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .menu-title {
+            color: #81C784;
+        }
+        body.dark-theme .menu-title.active {
+            background: rgba(129, 199, 132, 0.2);
+        }
+        body.dark-theme .form-group input,
+        body.dark-theme .form-group select,
+        body.dark-theme .form-group textarea {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        body.dark-theme .form-group label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .report-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        body.dark-theme .report-card h3 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        body.dark-theme .report-card .description {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        body.dark-theme .report-card .stats {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        body.dark-theme .stat-item {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        body.dark-theme .stat-value {
+            color: #81C784;
+        }
+        body.dark-theme .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .nav-tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .nav-tab:hover {
+            color: white;
+        }
+        
+        /* Dark theme para elementos que ficam no light */
+        body.dark-theme .nav-tab {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.dark-theme .nav-tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+        
+        body.dark-theme .nav-tab:hover {
+            color: white;
+        }
+        
+        body.dark-theme .report-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme .report-card h3 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.dark-theme .report-card p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        body.dark-theme .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme .chart-container h3 {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body.dark-theme .btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        body.dark-theme .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        body.dark-theme .btn-primary {
+            background: #667eea;
+        }
+        
+        body.dark-theme .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .report-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .report-card .description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+
+        .report-card .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .filter-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .logs-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-info {
+            flex: 1;
+        }
+
+        .log-level {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-right: 0.5rem;
+        }
+
+        .log-error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+        }
+
+        .log-warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .log-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .log-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .log-message {
+            color: #333;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .log-time {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .log-user {
+            color: #667eea;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <span class="logo-text">🦷 LabPro</span>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        </div>
+        
+        <div class="menu-section">
+            <div class="menu-title" onclick="showPage('inicio')">
+                <span data-icon="🏠">🏠 Início</span>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="🏭">🏭 Produção</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('ordem-servico')">Ordem de Serviço</div>
+                <div class="menu-item" onclick="showPage('controle-producao')">Controle de Produção</div>
+                <div class="menu-item" onclick="showPage('agenda-producao')">Agenda de Produção</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="💰">💰 Financeiro</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('contas-receber')">Contas a Receber</div>
+                <div class="menu-item" onclick="showPage('contas-pagar')">Contas a Pagar</div>
+                <div class="menu-item" onclick="showPage('conta-bancaria')">Conta Bancaria</div>
+                <div class="menu-item" onclick="showPage('caixa-fisico')">Caixa Fisico</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📋">📋 Cadastros</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('clientes')">Clientes</div>
+                <div class="menu-item" onclick="showPage('tabela-precos')">Tabela de Preços</div>
+                <div class="menu-item" onclick="showPage('setores')">Setores</div>
+                <div class="menu-item" onclick="showPage('materiais')">Materiais Rec Dentista</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📦">📦 Estoque</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('produtos')">Produtos</div>
+                <div class="menu-item" onclick="showPage('orcamento')">Orçamento</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="📊">📊 Relatórios</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('fluxo-caixa')">Fluxo de caixa</div>
+                <div class="menu-item" onclick="showPage('relatorio-producao')">Produção</div>
+                <div class="menu-item" onclick="showPage('relatorio-estoque')">Estoque</div>
+                <div class="menu-item" onclick="showPage('logs')">Logs</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-title" onclick="toggleMenu(this)">
+                <span data-icon="⚙️">⚙️ Configurações</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="submenu">
+                <div class="menu-item" onclick="showPage('configuracoes-gerais')">Configurações Gerais</div>
+                <div class="menu-item" onclick="showPage('usuarios')">Usuários</div>
+                <div class="menu-item" onclick="showPage('modelo-ficha')">Modelo de Ficha</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 id="pageTitle">📊 Relatórios</h1>
+            <div class="user-info">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeText">Dark</span>
+                </button>
+                <span id="userName">Administrador</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </div>
+        <!-- Navegação entre abas -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('fluxo-caixa')">
+                💰 Fluxo de Caixa
+            </button>
+            <button class="nav-tab" onclick="showTab('producao')">
+                📈 Produção
+            </button>
+            <button class="nav-tab" onclick="showTab('estoque')">
+                📦 Estoque
+            </button>
+            <button class="nav-tab" onclick="showTab('logs')">
+                📋 Logs
+            </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label>Período:</label>
+                <select id="periodFilter">
+                    <option value="today">Hoje</option>
+                    <option value="week">Esta Semana</option>
+                    <option value="month">Este Mês</option>
+                    <option value="quarter">Este Trimestre</option>
+                    <option value="year">Este Ano</option>
+                    <option value="custom">Personalizado</option>
+                </select>
+                
+                <label>Tipo:</label>
+                <select id="typeFilter">
+                    <option value="all">Todos</option>
+                    <option value="receita">Receitas</option>
+                    <option value="despesa">Despesas</option>
+                    <option value="lucro">Lucro</option>
+                </select>
+                
+                <button class="btn btn-primary" onclick="gerarRelatorio()">
+                    <i class="fas fa-file-export"></i> Gerar Relatório
+                </button>
+            </div>
+        </div>
+
+        <!-- Aba Fluxo de Caixa -->
+        <div id="fluxo-caixa" class="tab-content active">
+            <div class="reports-grid">
+                <div class="report-card" onclick="abrirRelatorio('fluxo-caixa-diario')">
+                    <h3>💰 Fluxo de Caixa Diário</h3>
+                    <div class="description">
+                        Relatório detalhado do fluxo de caixa do dia atual com entradas, saídas e saldo.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">R$ 5.680</div>
+                            <div class="stat-label">Entradas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">R$ 1.200</div>
+                            <div class="stat-label">Saídas</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-chart-line"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-file-excel"></i> Exportar Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card" onclick="abrirRelatorio('fluxo-caixa-mensal')">
+                    <h3>📊 Fluxo de Caixa Mensal</h3>
+                    <div class="description">
+                        Relatório mensal consolidado com análise comparativa com meses anteriores.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">R$ 45.680</div>
+                            <div class="stat-label">Receitas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">R$ 12.340</div>
+                            <div class="stat-label">Despesas</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-chart-pie"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-file-pdf"></i> Gerar PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card" onclick="abrirRelatorio('contas-receber')">
+                    <h3>💳 Contas a Receber</h3>
+                    <div class="description">
+                        Relatório de contas a receber com status de pagamento e vencimentos.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">15</div>
+                            <div class="stat-label">Em Aberto</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">R$ 8.500</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-list"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-envelope"></i> Enviar Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Fluxo de Caixa -->
+            <div class="chart-container">
+                <h3 style="margin-bottom: 1rem;">📈 Fluxo de Caixa - Últimos 7 Dias</h3>
+                <div class="chart-placeholder">
+                    <i class="fas fa-chart-line fa-3x"></i>
+                    <p>Gráfico de fluxo de caixa será exibido aqui</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Produção -->
+        <div id="producao" class="tab-content">
+            <div class="reports-grid">
+                <div class="report-card" onclick="abrirRelatorio('producao-diaria')">
+                    <h3>📈 Produção Diária</h3>
+                    <div class="description">
+                        Relatório de produção diária com tempo médio e produtividade por técnico.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">24</div>
+                            <div class="stat-label">OS Concluídas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">2.5h</div>
+                            <div class="stat-label">Tempo Médio</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-chart-bar"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card" onclick="abrirRelatorio('producao-mensal')">
+                    <h3>🏭 Produção Mensal</h3>
+                    <div class="description">
+                        Relatório mensal de produção com análise de eficiência e gargalos.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">156</div>
+                            <div class="stat-label">OS no Mês</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">+15%</div>
+                            <div class="stat-label">Crescimento</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-chart-area"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-file-pdf"></i> Gerar PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card" onclick="abrirRelatorio('eficiencia-tecnicos')">
+                    <h3>👥 Eficiência por Técnico</h3>
+                    <div class="description">
+                        Análise de produtividade individual de cada técnico do laboratório.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">8</div>
+                            <div class="stat-label">Técnicos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">85%</div>
+                            <div class="stat-label">Eficiência Média</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-users"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-file-excel"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Produção -->
+            <div class="chart-container">
+                <h3 style="margin-bottom: 1rem;">📊 Produção Mensal - Últimos 6 Meses</h3>
+                <div class="chart-placeholder">
+                    <i class="fas fa-chart-bar fa-3x"></i>
+                    <p>Gráfico de produção será exibido aqui</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Estoque -->
+        <div id="estoque" class="tab-content">
+            <div class="reports-grid">
+                <div class="report-card" onclick="abrirRelatorio('movimentacao-estoque')">
+                    <h3>📦 Movimentação de Estoque</h3>
+                    <div class="description">
+                        Relatório completo de movimentações de entrada e saída do estoque.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">156</div>
+                            <div class="stat-label">Movimentações</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">R$ 89.450</div>
+                            <div class="stat-label">Valor Total</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-boxes"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-file-excel"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card" onclick="abrirRelatorio('estoque-baixo')">
+                    <h3>⚠️ Estoque Baixo</h3>
+                    <div class="description">
+                        Alerta de produtos com estoque abaixo do mínimo estabelecido.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">23</div>
+                            <div class="stat-label">Itens Críticos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">R$ 12.300</div>
+                            <div class="stat-label">Valor em Risco</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-exclamation-triangle"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-envelope"></i> Enviar Alerta
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card" onclick="abrirRelatorio('valor-estoque')">
+                    <h3>💰 Valor do Estoque</h3>
+                    <div class="description">
+                        Análise do valor total do estoque por categoria e fornecedor.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">1.245</div>
+                            <div class="stat-label">Itens</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">R$ 89.450</div>
+                            <div class="stat-label">Valor Total</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-chart-pie"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-file-pdf"></i> Gerar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Estoque -->
+            <div class="chart-container">
+                <h3 style="margin-bottom: 1rem;">📦 Valor do Estoque por Categoria</h3>
+                <div class="chart-placeholder">
+                    <i class="fas fa-chart-pie fa-3x"></i>
+                    <p>Gráfico de estoque será exibido aqui</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Logs -->
+        <div id="logs" class="tab-content">
+            <div class="reports-grid">
+                <div class="report-card" onclick="abrirRelatorio('logs-sistema')">
+                    <h3>📋 Logs do Sistema</h3>
+                    <div class="description">
+                        Registro completo de eventos e atividades do sistema.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">2.456</div>
+                            <div class="stat-label">Registros Hoje</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">45</div>
+                            <div class="stat-label">Erros</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-list-alt"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card" onclick="abrirRelatorio('logs-acesso')">
+                    <h3>🔐 Logs de Acesso</h3>
+                    <div class="description">
+                        Registro de acessos e tentativas de login no sistema.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">89</div>
+                            <div class="stat-label">Acessos Hoje</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">Falhas</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-shield-alt"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-file-csv"></i> Exportar CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-card" onclick="abrirRelatorio('logs-erros')">
+                    <h3>⚠️ Logs de Erros</h3>
+                    <div class="description">
+                        Registro detalhado de erros e exceções do sistema.
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">45</div>
+                            <div class="stat-label">Erros Hoje</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Críticos</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-bug"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-envelope"></i> Enviar Alerta
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Detalhados -->
+            <div class="logs-container">
+                <h3 style="margin-bottom: 1rem;">📋 Logs Recentes</h3>
+                
+                <div class="log-entry">
+                    <div class="log-info">
+                        <span class="log-level log-success">SUCCESS</span>
+                        <div class="log-message">Ordem de Serviço OS-00025 salva com sucesso</div>
+                        <div class="log-time">Hoje, 14:30:25</div>
+                    </div>
+                    <div class="log-user">admin</div>
+                </div>
+
+                <div class="log-entry">
+                    <div class="log-info">
+                        <span class="log-level log-info">INFO</span>
+                        <div class="log-message">Usuário joao.santos acessou o sistema</div>
+                        <div class="log-time">Hoje, 14:25:10</div>
+                    </div>
+                    <div class="log-user">joao.santos</div>
+                </div>
+
+                <div class="log-entry">
+                    <div class="log-info">
+                        <span class="log-level log-warning">WARNING</span>
+                        <div class="log-message">Estoque baixo detectado: Cerâmica IPS E.max</div>
+                        <div class="log-time">Hoje, 14:15:45</div>
+                    </div>
+                    <div class="log-user">system</div>
+                </div>
+
+                <div class="log-entry">
+                    <div class="log-info">
+                        <span class="log-level log-error">ERROR</span>
+                        <div class="log-message">Falha ao conectar com o banco de dados</div>
+                        <div class="log-time">Hoje, 14:10:30</div>
+                    </div>
+                    <div class="log-user">system</div>
+                </div>
+
+                <div class="log-entry">
+                    <div class="log-info">
+                        <span class="log-level log-success">SUCCESS</span>
+                        <div class="log-message">Backup automático concluído com sucesso</div>
+                        <div class="log-time">Hoje, 14:00:00</div>
+                    </div>
+                    <div class="log-user">system</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar data atual
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.textContent = now.toLocaleDateString('pt-BR', options);
+            }
+        }
+
+        // Funções de navegação
+        function showTab(tabId) {
+            // Esconder todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remover classe ativo de todos os botões
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar aba selecionada
+            document.getElementById(tabId).classList.add('active');
+            
+            // Adicionar classe ativo ao botão selecionado
+            event.target.classList.add('active');
+        }
+
+        // Funções do menu lateral
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            const arrow = element.querySelector('.arrow');
+            
+            // Fechar outros submenus
+            document.querySelectorAll('.submenu').forEach(menu => {
+                if (menu !== submenu) {
+                    menu.classList.remove('active');
+                }
+            });
+            
+            document.querySelectorAll('.arrow').forEach(a => {
+                if (a !== arrow) {
+                    a.classList.remove('rotated');
+                }
+            });
+            
+            // Toggle current submenu
+            submenu.classList.toggle('active');
+            arrow.classList.toggle('rotated');
+        }
+
+        function showPage(pageId) {
+            // Para páginas do mesmo módulo, mostrar abas internas
+            const internalPages = ['fluxo-caixa', 'relatorio-producao', 'relatorio-estoque', 'logs'];
+            if (internalPages.includes(pageId)) {
+                // Mapear IDs do menu para IDs das abas
+                const tabMapping = {
+                    'relatorio-producao': 'producao',
+                    'relatorio-estoque': 'estoque'
+                };
+                const tabId = tabMapping[pageId] || pageId;
+                showTab(tabId);
+                return;
+            }
+            
+            // Redirecionar para os novos arquivos HTML separados
+            const pageUrls = {
+                'ordem-servico': '/producao.html',
+                'controle-producao': '/producao.html',
+                'agenda-producao': '/producao.html',
+                'contas-receber': '/financeiro.html',
+                'contas-pagar': '/financeiro.html',
+                'conta-bancaria': '/financeiro.html',
+                'caixa-fisico': '/financeiro.html',
+                'clientes': '/cadastros.html',
+                'tabela-precos': '/cadastros.html',
+                'setores': '/cadastros.html',
+                'materiais': '/cadastros.html',
+                'produtos': '/estoque.html',
+                'orcamento': '/estoque.html',
+                'configuracoes-gerais': '/configuracoes.html',
+                'usuarios': '/configuracoes.html',
+                'modelo-ficha': '/configuracoes.html'
+            };
+            
+            // Se a página tiver um URL separado, redirecionar
+            if (pageUrls[pageId]) {
+                window.location.href = pageUrls[pageId];
+                return;
+            }
+            
+            // Para página início, redirecionar para o dashboard
+            if (pageId === 'inicio') {
+                window.location.href = '/dashboard.html';
+                return;
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-theme');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            // Salvar tema em todas as páginas
+            localStorage.setItem('labpro-theme', body.classList.contains('dark-theme') ? 'dark' : 'light');
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            window.location.href = '/index.html';
+        }
+
+        // Funções de interação
+        function abrirRelatorio(tipo) {
+            alert(`Abrindo relatório: ${tipo}`);
+        }
+
+        function gerarRelatorio(tipo) {
+            alert(`Gerando relatório: ${tipo}`);
+        }
+
+        function exportarRelatorio(tipo) {
+            alert(`Exportando relatório: ${tipo}`);
+        }
+
+        function enviarAlerta() {
+            alert('Enviando alerta por e-mail...');
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDate();
+            setInterval(updateDate, 60000); // Atualizar a cada minuto
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Light';
+            }
+            
+            // Expandir menu Relatórios por padrão
+            const relatoriosMenu = document.querySelector('.menu-title[data-icon="📊"]').parentElement.querySelector('.submenu');
+            const relatoriosArrow = document.querySelector('.menu-title[data-icon="📊"]').parentElement.querySelector('.arrow');
+            if (relatoriosMenu) {
+                relatoriosMenu.classList.add('active');
+                if (relatoriosArrow) relatoriosArrow.classList.add('rotated');
+            }
+        });
+    </script>
+    <script src="shared.js"></script>
+</body>
+</html>
