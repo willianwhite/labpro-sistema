@@ -1336,11 +1336,19 @@
             }
             
             // Expandir menu Relatórios por padrão
-            const relatoriosMenu = document.querySelector('.menu-title[data-icon="📊"]').parentElement.querySelector('.submenu');
-            const relatoriosArrow = document.querySelector('.menu-title[data-icon="📊"]').parentElement.querySelector('.arrow');
+            const relatoriosMenu = document.querySelector('.menu-title[data-icon="📊"]');
+            const relatoriosArrow = document.querySelector('.menu-title[data-icon="📊"]');
+            
             if (relatoriosMenu) {
-                relatoriosMenu.classList.add('active');
-                if (relatoriosArrow) relatoriosArrow.classList.add('rotated');
+                const submenu = relatoriosMenu.parentElement.querySelector('.submenu');
+                const arrow = relatoriosMenu.parentElement.querySelector('.arrow');
+                
+                if (submenu) {
+                    submenu.classList.add('active');
+                }
+                if (arrow) {
+                    arrow.classList.add('rotated');
+                }
             }
         });
     </script>
