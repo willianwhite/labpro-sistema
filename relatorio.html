@@ -529,6 +529,57 @@
             color: white;
         }
 
+        .log-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        /* Dark theme para logs container */
+        body.dark-theme .logs-container {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        body.dark-theme .log-entry {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        body.dark-theme .log-entry:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-theme .log-time {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        body.dark-theme .log-level {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        body.dark-theme .log-message {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        body.dark-theme .log-error {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        body.dark-theme .log-warning {
+            background: linear-gradient(135deg, #fd7e14 0%, #f57c00 100%);
+            color: white;
+        }
+
+        body.dark-theme .log-success {
+            background: linear-gradient(135deg, #198754 0%, #157347 100%);
+            color: white;
+        }
+
         .log-info {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
@@ -1294,6 +1345,5 @@
         });
     </script>
     <script src="shared.js"></script>
-    <link rel="stylesheet" href="relatorio_dark_fix.css">
 </body>
 </html>
