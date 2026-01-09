@@ -233,13 +233,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         }
     } else {
         // Listar todos os clientes
-        $result = $conn->query("SELECT * FROM clientes WHERE ativo = 1 ORDER BY data_cadastro DESC");
-        
-        if ($result) {
-            $clientes = $result->fetch_all(MYSQLI_ASSOC);
-            echo json_encode(['success' => true, 'data' => $clientes]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Erro ao listar clientes', 'error' => $conn->error]);
+        try {
+            $result = $conn->query("SELECT * FROM clientes WHERE ativo = 1 ORDER BY data_cadastro DESC");
+            
+            if ($result) {
+                $clientes = $result->fetch_all(MYSQLI_ASSOC);
+                echo json_encode(['success' => true, 'data' => $clientes]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Erro ao listar clientes', 'error' => $conn->error]);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Exceção ao listar clientes', 'error' => $e->getMessage()]);
         }
     }
     exit;
