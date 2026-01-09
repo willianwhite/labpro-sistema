@@ -729,13 +729,16 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             flex-wrap: wrap;
             align-items: end;
+            justify-content: space-between;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            min-width: 150px;
+            flex: 1;
+            min-width: 180px;
+            max-width: 220px;
         }
 
         .filter-group label {
@@ -769,6 +772,7 @@
             display: flex;
             gap: 0.5rem;
             align-items: center;
+            flex: 1;
         }
 
         .search-type-select {
@@ -780,6 +784,7 @@
             font-size: 0.8rem;
             transition: all 0.3s ease;
             min-width: 80px;
+            max-width: 100px;
         }
 
         .search-type-select:focus {
@@ -801,7 +806,8 @@
             color: white;
             font-size: 0.9rem;
             transition: all 0.3s ease;
-            min-width: 200px;
+            flex: 1;
+            min-width: 150px;
         }
 
         .filter-input:focus {
@@ -865,15 +871,40 @@
             .filters-container {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 1rem;
             }
 
             .filter-group {
                 min-width: auto;
+                max-width: none;
+                flex: none;
+            }
+
+            .search-input-container {
+                flex-direction: row;
+                align-items: stretch;
+                flex: none;
+            }
+
+            .filter-input {
+                min-width: auto;
+                flex: 1;
+            }
+
+            .search-type-select {
+                max-width: none;
+                min-width: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filters-container {
+                padding: 1rem;
             }
 
             .search-input-container {
                 flex-direction: column;
-                align-items: stretch;
+                gap: 0.5rem;
             }
 
             .filter-input {
