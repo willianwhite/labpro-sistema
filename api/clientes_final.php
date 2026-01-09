@@ -92,6 +92,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         exit;
     }
     
+    // Verificar se o cliente existe antes de excluir
+    $checkSql = "SELECT id FROM clientes WHERE id = ? AND ativo = 1";
+    $checkStmt = $conn->prepare($checkSql);
+    
+    if ($checkStmt) {
+        $checkStmt->bind_param("s", $data['id']);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        $clienteExists = $checkResult->num_rows > 0;
+        $checkStmt->close();
+        
+        if (!$clienteExists) {
+            echo json_encode(['success' => false, 'message' => 'Cliente não encontrado ou já foi excluído']);
+            exit;
+        }
+    }
+    
     // Soft delete - marcar como inativo em vez de apagar
     $sql = "UPDATE clientes SET ativo = 0 WHERE id = ?";
     $stmt = $conn->prepare($sql);
@@ -100,7 +117,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
         $stmt->bind_param("s", $data['id']);
         
         if ($stmt->execute()) {
-            echo json_encode(['success' => true, 'message' => 'Cliente excluído com sucesso']);
+            $affectedRows = $stmt->affected_rows;
+            if ($affectedRows > 0) {
+                echo json_encode(['success' => true, 'message' => 'Cliente excluído com sucesso']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Nenhum cliente foi excluído']);
+            }
         } else {
             echo json_encode(['success' => false, 'message' => 'Erro ao excluir cliente', 'error' => $stmt->error]);
         }
