@@ -716,6 +716,143 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Estilos para os Filtros de Produção */
+        .filters-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .filter-select {
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .filter-select option {
+            background: #333;
+            color: white;
+        }
+
+        .search-input-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .filter-input {
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .filter-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-btn {
+            padding: 0.75rem 1rem;
+            background: #667eea;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        /* Dark theme para filtros */
+        body.dark-theme .filters-container {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-theme .filter-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-theme .filter-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-theme .search-btn {
+            background: #4a5568;
+        }
+
+        body.dark-theme .search-btn:hover {
+            background: #2d3748;
+        }
+
+        @media (max-width: 768px) {
+            .filters-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                min-width: auto;
+            }
+
+            .search-input-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-input {
+                min-width: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1082,6 +1219,72 @@
 
         <!-- Aba Controle de Produção -->
         <div id="controle-producao" class="tab-content">
+            <!-- Filtros de Busca -->
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="situacaoFilter">Situação:</label>
+                    <select id="situacaoFilter" class="filter-select">
+                        <option value="">Todas</option>
+                        <option value="producao">Produção</option>
+                        <option value="prova">Prova</option>
+                        <option value="aguardando">Aguardando</option>
+                        <option value="rota-entrega">Rota de Entrega</option>
+                        <option value="entregue">Entregue</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="mesFilter">Mês:</label>
+                    <select id="mesFilter" class="filter-select">
+                        <option value="">Todos</option>
+                        <option value="01">Janeiro</option>
+                        <option value="02">Fevereiro</option>
+                        <option value="03">Março</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Maio</option>
+                        <option value="06">Junho</option>
+                        <option value="07">Julho</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="anoFilter">Ano:</label>
+                    <select id="anoFilter" class="filter-select">
+                        <option value="">Todos</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="clienteFilter">Cliente:</label>
+                    <select id="clienteFilter" class="filter-select">
+                        <option value="">Todos</option>
+                        <option value="Dra. Maria Silva">Dra. Maria Silva</option>
+                        <option value="Dr. João Santos">Dr. João Santos</option>
+                        <option value="Dra. Ana Costa">Dra. Ana Costa</option>
+                        <option value="Dr. Pedro Oliveira">Dr. Pedro Oliveira</option>
+                        <option value="Dra. Carla Ferreira">Dra. Carla Ferreira</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="buscaFilter">Buscar:</label>
+                    <div class="search-input-container">
+                        <input type="text" id="buscaFilter" class="filter-input" placeholder="Nome do paciente ou ID...">
+                        <button class="search-btn" onclick="filtrarProducao()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Estatísticas Gerais -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -1597,6 +1800,94 @@
                     arrow.classList.add('rotated');
                 }
             }
+        });
+
+        // Função para filtrar produção
+        function filtrarProducao() {
+            const situacao = document.getElementById('situacaoFilter').value.toLowerCase();
+            const mes = document.getElementById('mesFilter').value;
+            const ano = document.getElementById('anoFilter').value;
+            const cliente = document.getElementById('clienteFilter').value.toLowerCase();
+            const busca = document.getElementById('buscaFilter').value.toLowerCase();
+
+            const productionCards = document.querySelectorAll('.production-card');
+            
+            productionCards.forEach(card => {
+                let mostrar = true;
+                
+                // Filtrar por situação
+                if (situacao) {
+                    const statusBadge = card.querySelector('.status-badge');
+                    const statusText = statusBadge ? statusBadge.textContent.toLowerCase() : '';
+                    if (!statusText.includes(situacao)) {
+                        mostrar = false;
+                    }
+                }
+                
+                // Filtrar por cliente
+                if (cliente && mostrar) {
+                    const clienteElement = card.querySelector('.detail-value');
+                    const clienteText = clienteElement ? clienteElement.textContent.toLowerCase() : '';
+                    if (!clienteText.includes(cliente)) {
+                        mostrar = false;
+                    }
+                }
+                
+                // Filtrar por busca (ID ou paciente)
+                if (busca && mostrar) {
+                    const osId = card.querySelector('h4').textContent.toLowerCase();
+                    const pacienteElement = card.querySelector('.detail-value');
+                    const pacienteText = pacienteElement ? pacienteElement.textContent.toLowerCase() : '';
+                    
+                    if (!osId.includes(busca) && !pacienteText.includes(busca)) {
+                        mostrar = false;
+                    }
+                }
+                
+                // Mostrar ou ocultar card
+                card.style.display = mostrar ? 'block' : 'none';
+            });
+            
+            // Mostrar mensagem se nenhum resultado
+            const visibleCards = Array.from(productionCards).filter(card => card.style.display !== 'none');
+            const container = document.querySelector('.production-grid');
+            
+            // Remover mensagem anterior
+            const existingMessage = container.querySelector('.no-results');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // Adicionar mensagem se nenhum resultado
+            if (visibleCards.length === 0 && (situacao || mes || ano || cliente || busca)) {
+                const noResultsMessage = document.createElement('div');
+                noResultsMessage.className = 'no-results';
+                noResultsMessage.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #666; grid-column: 1 / -1;">
+                        <i style="font-size: 3rem; margin-bottom: 1rem;">🔍</i>
+                        <h3>Nenhuma ordem encontrada</h3>
+                        <p>Não encontramos ordens com os filtros selecionados</p>
+                    </div>
+                `;
+                container.appendChild(noResultsMessage);
+            }
+        }
+
+        // Adicionar evento de input para busca em tempo real
+        document.addEventListener('DOMContentLoaded', function() {
+            const buscaFilter = document.getElementById('buscaFilter');
+            if (buscaFilter) {
+                buscaFilter.addEventListener('input', filtrarProducao);
+            }
+            
+            // Adicionar eventos para todos os filtros
+            const filtros = ['situacaoFilter', 'mesFilter', 'anoFilter', 'clienteFilter'];
+            filtros.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', filtrarProducao);
+                }
+            });
         });
     </script>
     <script src="shared.js"></script>
