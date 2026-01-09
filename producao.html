@@ -777,6 +777,11 @@
             color: white;
         }
 
+        body.dark-theme #cliente option {
+            background: #1a1a2e;
+            color: white;
+        }
+
         .search-input-container {
             display: flex;
             gap: 0.4rem;
@@ -1078,7 +1083,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cliente">🏢 Cliente</label>
-                        <select id="cliente">
+                        <select id="cliente" class="filter-select">
                             <option value="">Selecione...</option>
                             <option value="1">Dra. Maria Silva</option>
                             <option value="2">Dr. João Santos</option>
