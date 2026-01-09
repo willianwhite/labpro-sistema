@@ -1,5 +1,5 @@
 <?php
-// API de Clientes LabPro - Versão MySQL
+// API de Clientes LabPro - Versão MySQL (CORRIGIDA)
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -27,17 +27,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
     
-    $sql = "INSERT INTO clientes (tipo_cliente, nome, whatsapp, cpf, cnpj, email, ativo, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, 1, NOW())";
+    $sql = "INSERT INTO clientes (tipo_cliente, nome, whatsapp, cpf, cnpj, email, ativo, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     
     if ($stmt) {
-        $stmt->bind_param("sssssss", 
+        $stmt->bind_param("sssssssi", 
             $data['tipoCliente'], 
             $data['nome'], 
             $data['whatsapp'], 
             $data['cpf'] ?? '', 
             $data['cnpj'] ?? '', 
-            $data['email'] ?? ''
+            $data['email'] ?? '',
+            1,
+            NOW()
         );
         
         if ($stmt->execute()) {
