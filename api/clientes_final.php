@@ -27,11 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
     
-    $sql = "INSERT INTO clientes (tipo_cliente, nome, whatsapp, cpf, cnpj, email) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO clientes (tipo_cliente, nome, whatsapp, cpf, cnpj, email, ativo, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, 1, NOW())";
     $stmt = $conn->prepare($sql);
     
     if ($stmt) {
-        $stmt->bind_param("ssssss", 
+        $stmt->bind_param("sssssss", 
             $data['tipoCliente'], 
             $data['nome'], 
             $data['whatsapp'], 
@@ -61,7 +61,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
         exit;
     }
     
-    $sql = "UPDATE clientes SET whatsapp = ?, email = ? WHERE id = ?";
+    // Verificar se o cliente existe antes de atualizar
+    $checkSql = "SELECT id FROM clientes WHERE id = ? AND ativo = 1";
+    $checkStmt = $conn->prepare($checkSql);
+    
+    if ($checkStmt) {
+        $checkStmt->bind_param("s", $data['id']);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        $clienteExists = $checkResult->num_rows > 0;
+        $checkStmt->close();
+        
+        if (!$clienteExists) {
+            echo json_encode(['success' => false, 'message' => 'Cliente não encontrado ou já foi excluído']);
+            exit;
+        }
+    }
+    
+    $sql = "UPDATE clientes SET whatsapp = ?, email = ? WHERE id = ? AND ativo = 1";
     $stmt = $conn->prepare($sql);
     
     if ($stmt) {
@@ -72,7 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
         );
         
         if ($stmt->execute()) {
-            echo json_encode(['success' => true, 'message' => 'Cliente atualizado com sucesso']);
+            $affectedRows = $stmt->affected_rows;
+            if ($affectedRows > 0) {
+                echo json_encode(['success' => true, 'message' => 'Cliente atualizado com sucesso']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Nenhum dado foi alterado']);
+            }
         } else {
             echo json_encode(['success' => false, 'message' => 'Erro ao atualizar cliente', 'error' => $stmt->error]);
         }
