@@ -9,7 +9,7 @@ echo ""
 SERVER_IP="web143.kinghost.net"
 SERVER_USER="labpro"
 SERVER_PASS="Escola123"
-SERVER_PATH="/home/labpro/public_html"
+SERVER_PATH="www"
 
 # Função para executar comandos SSH
 execute_ssh() {
