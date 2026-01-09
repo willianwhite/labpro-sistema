@@ -117,15 +117,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
     }
     
     // Verificar se o cliente existe antes de excluir
-    $checkSql = "SELECT id FROM clientes WHERE id = ? AND ativo = 1";
-    $checkStmt = $conn->prepare($checkSql);
+    $deleteCheckSql = "SELECT id FROM clientes WHERE id = ? AND ativo = 1";
+    $deleteCheckStmt = $conn->prepare($deleteCheckSql);
     
-    if ($checkStmt) {
-        $checkStmt->bind_param("s", $data['id']);
-        $checkStmt->execute();
-        $checkResult = $checkStmt->get_result();
-        $clienteExists = $checkResult->num_rows > 0;
-        $checkStmt->close();
+    if ($deleteCheckStmt) {
+        $deleteCheckStmt->bind_param("s", $data['id']);
+        $deleteCheckStmt->execute();
+        $deleteCheckResult = $deleteCheckStmt->get_result();
+        $clienteExists = $deleteCheckResult->num_rows > 0;
+        $deleteCheckStmt->close();
         
         if (!$clienteExists) {
             echo json_encode(['success' => false, 'message' => 'Cliente não encontrado ou já foi excluído']);
