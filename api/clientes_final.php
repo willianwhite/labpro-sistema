@@ -20,24 +20,37 @@ if ($conn->connect_error) {
 
 // POST - Criar cliente
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Debug: Logar dados recebidos
+    error_log("POST request received: " . file_get_contents('php://input'));
+    
     $data = json_decode(file_get_contents('php://input'), true);
+    
+    // Debug: Verificar se JSON foi decodificado
+    if ($data === null) {
+        error_log("JSON decode error: " . json_last_error_msg());
+        echo json_encode(['success' => false, 'message' => 'JSON inválido', 'debug' => file_get_contents('php://input')]);
+        exit;
+    }
+    
+    error_log("Dados decodificados: " . print_r($data, true));
     
     if (!$data || empty($data['nome'])) {
         echo json_encode(['success' => false, 'message' => 'Nome obrigatório']);
         exit;
     }
     
-    $sql = "INSERT INTO clientes (tipo_cliente, nome, whatsapp, cpf, cnpj, email, ativo, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO clientes (tipo_cliente, nome, whatsapp, cpf, cnpj, email, celular, ativo, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     
     if ($stmt) {
-        $stmt->bind_param("sssssssi", 
+        $stmt->bind_param("ssssssssi", 
             $data['tipoCliente'], 
             $data['nome'], 
             $data['whatsapp'], 
             $data['cpf'] ?? '', 
             $data['cnpj'] ?? '', 
             $data['email'] ?? '',
+            $data['celular'] ?? '',
             1,
             NOW()
         );
