@@ -2452,218 +2452,179 @@
 
         // Função para ver cliente (somente leitura)
         function verCliente(clienteId) {
-            // Buscar cliente nos dados mockados
-            const clientes = [
-                {
-                    id: '1',
-                    nome: 'Dr. João Silva',
-                    tipoCliente: 'dentista',
-                    whatsapp: '(11) 99999-8888',
-                    email: 'joao@exemplo.com',
-                    cpf: '123.456.789-00'
-                },
-                {
-                    id: '2',
-                    nome: 'Clínica Sorriso Feliz',
-                    tipoCliente: 'clinica',
-                    whatsapp: '(11) 97777-6666',
-                    email: 'contato@sorrisofeliz.com.br',
-                    cnpj: '12.345.678/0001-99'
-                },
-                {
-                    id: '3',
-                    nome: 'LabPro Dental',
-                    tipoCliente: 'laboratorio',
-                    whatsapp: '(11) 95555-4444',
-                    email: 'contato@labpro.com.br',
-                    cnpj: '98.765.432/0001-88'
-                }
-            ];
-            
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) return;
-
-            // Criar modal de visualização
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>👤 Detalhes do Cliente</h2>
-                        <button class="modal-close" onclick="fecharModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>🏷️ Nome:</label>
-                                <input type="text" value="${cliente.nome}" readonly>
+            // Buscar cliente da API
+            fetch(`https://willianwhiteestevaod1767839682077.2002102.meusitehostgator.com.br/api/clientes_final.php?id=${clienteId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.clientes && data.clientes.length > 0) {
+                        const cliente = data.clientes[0];
+                        
+                        // Criar modal de visualização
+                        const modal = document.createElement('div');
+                        modal.className = 'modal-overlay';
+                        modal.innerHTML = `
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2>👤 Detalhes do Cliente</h2>
+                                    <button class="modal-close" onclick="fecharModal()">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>🏷️ Nome:</label>
+                                            <input type="text" value="${cliente.nome}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>👥 Tipo:</label>
+                                            <input type="text" value="${cliente.tipo_cliente === 'dentista' ? 'Dentista' : cliente.tipo_cliente === 'clinica' ? 'Clínica' : 'Laboratório'}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>📱 WhatsApp:</label>
+                                            <input type="text" value="${cliente.whatsapp}" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>📧 E-mail:</label>
+                                            <input type="email" value="${cliente.email || ''}" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>🆔 CPF/CNPJ:</label>
+                                            <input type="text" value="${cliente.cpf || cliente.cnpj || ''}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" onclick="fecharModal()">Fechar</button>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>👥 Tipo:</label>
-                                <input type="text" value="${cliente.tipoCliente === 'dentista' ? 'Dentista' : cliente.tipoCliente === 'clinica' ? 'Clínica' : 'Laboratório'}" readonly>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>📱 WhatsApp:</label>
-                                <input type="text" value="${cliente.whatsapp}" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>📧 E-mail:</label>
-                                <input type="email" value="${cliente.email || ''}" readonly>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>🆔 CPF/CNPJ:</label>
-                                <input type="text" value="${cliente.cpf || cliente.cnpj || ''}" readonly>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="fecharModal()">Fechar</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
+                        `;
+                        
+                        document.body.appendChild(modal);
+                    } else {
+                        alert('Cliente não encontrado!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar cliente:', error);
+                    alert('Erro ao buscar cliente. Tente novamente.');
+                });
         }
 
         // Função para editar cliente (com restrições)
         function editarCliente(clienteId) {
-            // Buscar cliente nos dados mockados
-            const clientes = [
-                {
-                    id: '1',
-                    nome: 'Dr. João Silva',
-                    tipoCliente: 'dentista',
-                    whatsapp: '(11) 99999-8888',
-                    email: 'joao@exemplo.com',
-                    cpf: '123.456.789-00'
-                },
-                {
-                    id: '2',
-                    nome: 'Clínica Sorriso Feliz',
-                    tipoCliente: 'clinica',
-                    whatsapp: '(11) 97777-6666',
-                    email: 'contato@sorrisofeliz.com.br',
-                    cnpj: '12.345.678/0001-99'
-                },
-                {
-                    id: '3',
-                    nome: 'LabPro Dental',
-                    tipoCliente: 'laboratorio',
-                    whatsapp: '(11) 95555-4444',
-                    email: 'contato@labpro.com.br',
-                    cnpj: '98.765.432/0001-88'
-                }
-            ];
-            
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) return;
-
-            // Criar modal de edição
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>✏️ Editar Cliente</h2>
-                        <button class="modal-close" onclick="fecharModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>🏷️ Nome:</label>
-                                <input type="text" value="${cliente.nome}" readonly>
-                                <small style="color: #666;">Nome não pode ser editado</small>
+            // Buscar cliente da API
+            fetch(`https://willianwhiteestevaod1767839682077.2002102.meusitehostgator.com.br/api/clientes_final.php?id=${clienteId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.clientes && data.clientes.length > 0) {
+                        const cliente = data.clientes[0];
+                        
+                        // Criar modal de edição
+                        const modal = document.createElement('div');
+                        modal.className = 'modal-overlay';
+                        modal.innerHTML = `
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2>✏️ Editar Cliente</h2>
+                                    <button class="modal-close" onclick="fecharModal()">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>🏷️ Nome:</label>
+                                            <input type="text" value="${cliente.nome}" readonly>
+                                            <small style="color: #666;">Nome não pode ser editado</small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>👥 Tipo:</label>
+                                            <input type="text" value="${cliente.tipo_cliente === 'dentista' ? 'Dentista' : cliente.tipo_cliente === 'clinica' ? 'Clínica' : 'Laboratório'}" readonly>
+                                            <small style="color: #666;">Tipo não pode ser editado</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>🆔 CPF/CNPJ:</label>
+                                            <input type="text" value="${cliente.cpf || cliente.cnpj || ''}" readonly>
+                                            <small style="color: #666;">CPF/CNPJ não pode ser editado</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>📱 WhatsApp:</label>
+                                            <input type="text" id="edit-whatsapp" value="${cliente.whatsapp}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>📧 E-mail:</label>
+                                            <input type="email" id="edit-email" value="${cliente.email || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                                    <button class="btn btn-primary" onclick="salvarEdicaoCliente('${clienteId}')">Salvar</button>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>👥 Tipo:</label>
-                                <input type="text" value="${cliente.tipoCliente === 'dentista' ? 'Dentista' : cliente.tipoCliente === 'clinica' ? 'Clínica' : 'Laboratório'}" readonly>
-                                <small style="color: #666;">Tipo não pode ser editado</small>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>🆔 CPF/CNPJ:</label>
-                                <input type="text" value="${cliente.cpf || cliente.cnpj || ''}" readonly>
-                                <small style="color: #666;">CPF/CNPJ não pode ser editado</small>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>📱 WhatsApp:</label>
-                                <input type="text" id="edit-whatsapp" value="${cliente.whatsapp}">
-                            </div>
-                            <div class="form-group">
-                                <label>📧 E-mail:</label>
-                                <input type="email" id="edit-email" value="${cliente.email || ''}">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
-                        <button class="btn btn-primary" onclick="salvarEdicaoCliente('${clienteId}')">Salvar</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
+                        `;
+                        
+                        document.body.appendChild(modal);
+                    } else {
+                        alert('Cliente não encontrado!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar cliente:', error);
+                    alert('Erro ao buscar cliente. Tente novamente.');
+                });
         }
 
         // Função para excluir cliente (com confirmação)
         function excluirCliente(clienteId) {
-            // Buscar cliente nos dados mockados
-            const clientes = [
-                {
-                    id: '1',
-                    nome: 'Dr. João Silva',
-                    tipoCliente: 'dentista'
-                },
-                {
-                    id: '2',
-                    nome: 'Clínica Sorriso Feliz',
-                    tipoCliente: 'clinica'
-                },
-                {
-                    id: '3',
-                    nome: 'LabPro Dental',
-                    tipoCliente: 'laboratorio'
-                }
-            ];
-            
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) return;
-
-            // Criar modal de confirmação
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content modal-confirm">
-                    <div class="modal-header">
-                        <h2>⚠️ Confirmar Exclusão</h2>
-                        <button class="modal-close" onclick="fecharModal()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <p style="text-align: center; margin: 20px 0;">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 1rem;"></i>
-                        </p>
-                        <p style="text-align: center; font-size: 1.1rem; margin-bottom: 1rem;">
-                            Tem certeza que deseja excluir o cliente <strong>${cliente.nome}</strong>?
-                        </p>
-                        <p style="text-align: center; color: #666;">
-                            Esta ação não poderá ser desfeita.
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
-                        <button class="btn btn-danger" onclick="confirmarExclusaoCliente('${clienteId}')">Excluir</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
+            // Buscar cliente da API
+            fetch(`https://willianwhiteestevaod1767839682077.2002102.meusitehostgator.com.br/api/clientes_final.php?id=${clienteId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.clientes && data.clientes.length > 0) {
+                        const cliente = data.clientes[0];
+                        
+                        // Criar modal de confirmação
+                        const modal = document.createElement('div');
+                        modal.className = 'modal-overlay';
+                        modal.innerHTML = `
+                            <div class="modal-content modal-confirm">
+                                <div class="modal-header">
+                                    <h2>⚠️ Confirmar Exclusão</h2>
+                                    <button class="modal-close" onclick="fecharModal()">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <p style="text-align: center; margin: 20px 0;">
+                                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 1rem;"></i>
+                                    </p>
+                                    <p style="text-align: center; font-size: 1.1rem; margin-bottom: 1rem;">
+                                        Tem certeza que deseja excluir o cliente <strong>${cliente.nome}</strong>?
+                                    </p>
+                                    <p style="text-align: center; color: #666;">
+                                        Esta ação não poderá ser desfeita.
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                                    <button class="btn btn-danger" onclick="confirmarExclusaoCliente('${clienteId}')">Excluir</button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.body.appendChild(modal);
+                    } else {
+                        alert('Cliente não encontrado!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar cliente:', error);
+                    alert('Erro ao buscar cliente. Tente novamente.');
+                });
         }
 
         // Função para fechar modal
@@ -2684,16 +2645,62 @@
                 return;
             }
             
-            // Simular salvamento
-            alert('Cliente atualizado com sucesso!');
-            fecharModal();
+            // Enviar atualização para API
+            fetch(`https://willianwhiteestevaod1767839682077.2002102.meusitehostgator.com.br/api/clientes_final.php`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: clienteId,
+                    whatsapp: whatsapp,
+                    email: email
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Cliente atualizado com sucesso!');
+                    fecharModal();
+                    // Recarregar lista de clientes
+                    carregarClientes();
+                } else {
+                    alert('Erro ao atualizar cliente: ' + (data.message || 'Erro desconhecido'));
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar cliente:', error);
+                alert('Erro ao atualizar cliente. Tente novamente.');
+            });
         }
 
         // Função para confirmar exclusão
         function confirmarExclusaoCliente(clienteId) {
-            // Simular exclusão
-            alert('Cliente excluído com sucesso!');
-            fecharModal();
+            // Enviar exclusão para API
+            fetch(`https://willianwhiteestevaod1767839682077.2002102.meusitehostgator.com.br/api/clientes_final.php`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: clienteId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Cliente excluído com sucesso!');
+                    fecharModal();
+                    // Recarregar lista de clientes
+                    carregarClientes();
+                } else {
+                    alert('Erro ao excluir cliente: ' + (data.message || 'Erro desconhecido'));
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao excluir cliente:', error);
+                alert('Erro ao excluir cliente. Tente novamente.');
+            });
         }
 
         // Função para alternar abas do modal
