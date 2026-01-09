@@ -730,6 +730,8 @@
             flex-wrap: wrap;
             align-items: end;
             justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .filter-group {
@@ -737,8 +739,9 @@
             flex-direction: column;
             gap: 0.5rem;
             flex: 1;
-            min-width: 180px;
-            max-width: 220px;
+            min-width: 160px;
+            max-width: 200px;
+            box-sizing: border-box;
         }
 
         .filter-group label {
@@ -773,6 +776,7 @@
             gap: 0.5rem;
             align-items: center;
             flex: 1;
+            box-sizing: border-box;
         }
 
         .search-type-select {
@@ -783,8 +787,10 @@
             color: white;
             font-size: 0.8rem;
             transition: all 0.3s ease;
-            min-width: 80px;
-            max-width: 100px;
+            min-width: 70px;
+            max-width: 90px;
+            box-sizing: border-box;
+            flex-shrink: 0;
         }
 
         .search-type-select:focus {
@@ -807,7 +813,8 @@
             font-size: 0.9rem;
             transition: all 0.3s ease;
             flex: 1;
-            min-width: 150px;
+            min-width: 120px;
+            box-sizing: border-box;
         }
 
         .filter-input:focus {
@@ -872,18 +879,21 @@
                 flex-direction: column;
                 align-items: stretch;
                 gap: 1rem;
+                width: 100%;
             }
 
             .filter-group {
                 min-width: auto;
                 max-width: none;
                 flex: none;
+                width: 100%;
             }
 
             .search-input-container {
                 flex-direction: row;
                 align-items: stretch;
                 flex: none;
+                width: 100%;
             }
 
             .filter-input {
@@ -892,23 +902,32 @@
             }
 
             .search-type-select {
-                max-width: none;
-                min-width: 80px;
+                max-width: 90px;
+                min-width: 70px;
+                flex-shrink: 0;
             }
         }
 
         @media (max-width: 480px) {
             .filters-container {
                 padding: 1rem;
+                width: 100%;
             }
 
             .search-input-container {
                 flex-direction: column;
                 gap: 0.5rem;
+                width: 100%;
             }
 
             .filter-input {
                 min-width: auto;
+                width: 100%;
+            }
+
+            .search-type-select {
+                width: 100%;
+                max-width: none;
             }
         }
     </style>
