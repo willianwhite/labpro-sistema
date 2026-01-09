@@ -1,0 +1,69 @@
+# Arquivos e diretórios a serem ignorados pelo Git
+# Segurança: Não commitar senhas e dados sensíveis
+
+# Configurações
+config.php
+*.key
+*.pem
+*.p12
+.env
+.env.*
+credentials.json
+
+# Logs
+logs/
+*.log
+error.log
+access.log
+
+# Backup
+backup/
+*.backup
+*.bak
+*.old
+
+# Sistemas operacionais
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node.js (se usar no futuro)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (se usar no futuro)
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Banco de dados
+*.sql
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads temporários
+uploads/
+temp/
+cache/
+
+# Documentação
+docs/_build/
+docs/.obsidian/
+
+# Segurança adicional
+.htaccess
+sftp.json
+ftp.json

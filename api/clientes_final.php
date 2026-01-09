@@ -1,11 +1,20 @@
 <?php
-// API de Clientes LabPro - Versão MySQL (CORRIGIDA)
-// Limpar qualquer output anterior
-if (ob_get_level()) {
-    ob_clean();
+// API de Clientes LabPro - Versão com Configuração Centralizada
+// Incluir carregador de configuração
+require_once __DIR__ . '/config_loader.php';
+
+// Verificar se a configuração foi carregada
+if (!defined('DB_HOST')) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Erro: Configuração não encontrada',
+        'error' => 'Arquivo config.php não localizado ou inválido'
+    ]);
+    exit;
 }
 
-// Definir headers APENAS uma vez
+// Headers CORS
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -15,196 +24,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit(0);
 }
 
-// Conexão MySQL
-$conn = new mysqli('localhost', 'willi767_labpro_user', 'Escola123!', 'willi767_labpro');
+// Conexão MySQL - usando configuração centralizada
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
 if ($conn->connect_error) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Conexão falhou', 'error' => $conn->connect_error]);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Erro de conexão com o banco de dados',
+        'error' => $conn->connect_error
+    ]);
     exit;
 }
 
-// POST - Criar cliente
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Debug: Logar dados recebidos
-    error_log("POST request received: " . file_get_contents('php://input'));
-    
-    $json_input = file_get_contents('php://input');
-    if (empty($json_input)) {
-        error_log("JSON input is empty");
-        echo json_encode(['success' => false, 'message' => 'JSON vazio recebido']);
-        exit;
-    }
-    
-    $data = json_decode($json_input, true);
-    
-    // Debug: Verificar se JSON foi decodificado
-    if ($data === null) {
-        error_log("JSON decode error: " . json_last_error_msg());
-        echo json_encode(['success' => false, 'message' => 'JSON inválido', 'debug' => $json_input]);
-        exit;
-    }
-    
-    error_log("Dados decodificados: " . print_r($data, true));
-    
-    if (!$data || empty($data['nome'])) {
-        echo json_encode(['success' => false, 'message' => 'Nome obrigatório']);
-        exit;
-    }
-    
-    // Verificar estrutura da tabela
-    error_log("Verificando estrutura da tabela clientes...");
-    $table_check = $conn->query("DESCRIBE clientes");
-    if ($table_check) {
-        while ($row = $table_check->fetch_assoc()) {
-            error_log("Campo: " . $row['Field'] . " - Tipo: " . $row['Type']);
-        }
-    }
-    
-    $sql = "INSERT INTO clientes (tipo_cliente, nome, whatsapp, cpf, cnpj, email, celular, ativo, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    error_log("SQL: " . $sql);
-    $stmt = $conn->prepare($sql);
-    
-    if ($stmt) {
-        $stmt->bind_param("sssssssi", 
-            $data['tipoCliente'], 
-            $data['nome'], 
-            $data['whatsapp'], 
-            $data['cpf'] ?? '', 
-            $data['cnpj'] ?? '', 
-            $data['email'] ?? '',
-            $data['celular'] ?? '',
-            1,
-            NOW()
-        );
-        
-        error_log("Parâmetros bindados com sucesso");
-        
-        if ($stmt->execute()) {
-            error_log("Cliente inserido com sucesso");
-            $response = ['success' => true, 'message' => 'Cliente criado com sucesso'];
-            echo json_encode($response);
-            exit;
-        } else {
-            error_log("Erro ao executar stmt: " . $stmt->error);
-            $response = ['success' => false, 'message' => 'Erro ao criar cliente', 'error' => $stmt->error];
-            echo json_encode($response);
-            exit;
-        }
-        $stmt->close();
-    } else {
-        error_log("Erro na preparação da query: " . $conn->error);
-        echo json_encode(['success' => false, 'message' => 'Erro na query', 'error' => $conn->error]);
-    }
+// Configurar charset
+$conn->set_charset('utf8mb4');
+
+// Função para resposta JSON
+function response($success, $message, $data = null, $status_code = 200) {
+    http_response_code($status_code);
+    echo json_encode([
+        'success' => $success,
+        'message' => $message,
+        'data' => $data
+    ]);
     exit;
 }
 
-// PUT - Atualizar cliente
-if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (!$data || empty($data['id'])) {
-        echo json_encode(['success' => false, 'message' => 'ID do cliente obrigatório']);
-        exit;
-    }
-    
-    // Verificar se o cliente existe antes de atualizar
-    $checkSql = "SELECT id FROM clientes WHERE id = ? AND ativo = 1";
-    $checkStmt = $conn->prepare($checkSql);
-    
-    if ($checkStmt) {
-        $checkStmt->bind_param("s", $data['id']);
-        $checkStmt->execute();
-        $checkResult = $checkStmt->get_result();
-        $clienteExists = $checkResult->num_rows > 0;
-        $checkStmt->close();
-        
-        if (!$clienteExists) {
-            echo json_encode(['success' => false, 'message' => 'Cliente não encontrado ou já foi excluído']);
-            exit;
-        }
-    }
-    
-    $sql = "UPDATE clientes SET whatsapp = ?, email = ? WHERE id = ? AND ativo = 1";
-    $stmt = $conn->prepare($sql);
-    
-    if ($stmt) {
-        $stmt->bind_param("sss", 
-            $data['whatsapp'], 
-            $data['email'], 
-            $data['id']
-        );
-        
-        if ($stmt->execute()) {
-            $affectedRows = $stmt->affected_rows;
-            if ($affectedRows > 0) {
-                echo json_encode(['success' => true, 'message' => 'Cliente atualizado com sucesso']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Nenhum dado foi alterado']);
-            }
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Erro ao atualizar cliente', 'error' => $stmt->error]);
-        }
-        $stmt->close();
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Erro na query', 'error' => $conn->error]);
-    }
-    exit;
+// Log de requisição (apenas em debug)
+if (DEBUG_MODE) {
+    error_log("Request: " . $_SERVER['REQUEST_METHOD'] . " " . $_SERVER['REQUEST_URI']);
 }
 
-// DELETE - Excluir cliente
-if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    if (!$data || empty($data['id'])) {
-        echo json_encode(['success' => false, 'message' => 'ID do cliente obrigatório']);
-        exit;
-    }
-    
-    // Verificar se o cliente existe antes de excluir
-    $deleteCheckSql = "SELECT id FROM clientes WHERE id = ? AND ativo = 1";
-    $deleteCheckStmt = $conn->prepare($deleteCheckSql);
-    
-    if ($deleteCheckStmt) {
-        $deleteCheckStmt->bind_param("s", $data['id']);
-        $deleteCheckStmt->execute();
-        $deleteCheckResult = $deleteCheckStmt->get_result();
-        $clienteExists = $deleteCheckResult->num_rows > 0;
-        $deleteCheckStmt->close();
-        
-        if (!$clienteExists) {
-            echo json_encode(['success' => false, 'message' => 'Cliente não encontrado ou já foi excluído']);
-            exit;
-        }
-    }
-    
-    // Soft delete - marcar como inativo em vez de apagar
-    $sql = "UPDATE clientes SET ativo = 0 WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    
-    if ($stmt) {
-        $stmt->bind_param("s", $data['id']);
-        
-        if ($stmt->execute()) {
-            $affectedRows = $stmt->affected_rows;
-            if ($affectedRows > 0) {
-                echo json_encode(['success' => true, 'message' => 'Cliente excluído com sucesso']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Nenhum cliente foi excluído']);
-            }
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Erro ao excluir cliente', 'error' => $stmt->error]);
-        }
-        $stmt->close();
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Erro na query', 'error' => $conn->error]);
-    }
-    exit;
-}
-
-// GET - Listar clientes ou buscar por ID
+// GET - Listar clientes
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    // Verificar se há parâmetro ID
     if (isset($_GET['id'])) {
         $id = $_GET['id'];
         
