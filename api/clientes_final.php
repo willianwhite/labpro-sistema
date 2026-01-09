@@ -1,5 +1,11 @@
 <?php
 // API de Clientes LabPro - Versão MySQL (CORRIGIDA)
+// Limpar qualquer output anterior
+if (ob_get_level()) {
+    ob_clean();
+}
+
+// Definir headers APENAS uma vez
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -76,10 +82,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if ($stmt->execute()) {
             error_log("Cliente inserido com sucesso");
-            echo json_encode(['success' => true, 'message' => 'Cliente criado com sucesso']);
+            $response = ['success' => true, 'message' => 'Cliente criado com sucesso'];
+            echo json_encode($response);
+            exit;
         } else {
             error_log("Erro ao executar stmt: " . $stmt->error);
-            echo json_encode(['success' => false, 'message' => 'Erro ao criar cliente', 'error' => $stmt->error]);
+            $response = ['success' => false, 'message' => 'Erro ao criar cliente', 'error' => $stmt->error];
+            echo json_encode($response);
+            exit;
         }
         $stmt->close();
     } else {
