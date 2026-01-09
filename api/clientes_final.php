@@ -23,12 +23,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Debug: Logar dados recebidos
     error_log("POST request received: " . file_get_contents('php://input'));
     
-    $data = json_decode(file_get_contents('php://input'), true);
+    $json_input = file_get_contents('php://input');
+    if (empty($json_input)) {
+        error_log("JSON input is empty");
+        echo json_encode(['success' => false, 'message' => 'JSON vazio recebido']);
+        exit;
+    }
+    
+    $data = json_decode($json_input, true);
     
     // Debug: Verificar se JSON foi decodificado
     if ($data === null) {
         error_log("JSON decode error: " . json_last_error_msg());
-        echo json_encode(['success' => false, 'message' => 'JSON inválido', 'debug' => file_get_contents('php://input')]);
+        echo json_encode(['success' => false, 'message' => 'JSON inválido', 'debug' => $json_input]);
         exit;
     }
     
@@ -39,7 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
     
+    // Verificar estrutura da tabela
+    error_log("Verificando estrutura da tabela clientes...");
+    $table_check = $conn->query("DESCRIBE clientes");
+    if ($table_check) {
+        while ($row = $table_check->fetch_assoc()) {
+            error_log("Campo: " . $row['Field'] . " - Tipo: " . $row['Type']);
+        }
+    }
+    
     $sql = "INSERT INTO clientes (tipo_cliente, nome, whatsapp, cpf, cnpj, email, celular, ativo, data_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    error_log("SQL: " . $sql);
     $stmt = $conn->prepare($sql);
     
     if ($stmt) {
@@ -55,13 +72,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             NOW()
         );
         
+        error_log("Parâmetros bindados com sucesso");
+        
         if ($stmt->execute()) {
+            error_log("Cliente inserido com sucesso");
             echo json_encode(['success' => true, 'message' => 'Cliente criado com sucesso']);
         } else {
+            error_log("Erro ao executar stmt: " . $stmt->error);
             echo json_encode(['success' => false, 'message' => 'Erro ao criar cliente', 'error' => $stmt->error]);
         }
         $stmt->close();
     } else {
+        error_log("Erro na preparação da query: " . $conn->error);
         echo json_encode(['success' => false, 'message' => 'Erro na query', 'error' => $conn->error]);
     }
     exit;
