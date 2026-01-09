@@ -2364,14 +2364,26 @@
                 },
                 body: JSON.stringify(dadosCliente)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Cliente "${dadosCliente.nome}" cadastrado com sucesso!`);
-                    fecharModalCliente();
-                    carregarClientes();
-                } else {
-                    alert('Erro ao cadastrar cliente: ' + (data.message || 'Erro desconhecido'));
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.text(); // Mudar para text() para debug
+            })
+            .then(text => {
+                console.log('Response text:', text);
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        alert(`Cliente "${dadosCliente.nome}" cadastrado com sucesso!`);
+                        fecharModalCliente();
+                        carregarClientes();
+                    } else {
+                        alert('Erro ao cadastrar cliente: ' + (data.message || 'Erro desconhecido'));
+                    }
+                } catch (e) {
+                    console.error('JSON parse error:', e);
+                    console.error('Response text:', text);
+                    alert('Erro na resposta do servidor: ' + text);
                 }
             })
             .catch(error => {
