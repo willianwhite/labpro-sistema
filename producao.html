@@ -771,6 +771,28 @@
             align-items: center;
         }
 
+        .search-type-select {
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .search-type-select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .search-type-select option {
+            background: #333;
+            color: white;
+        }
+
         .filter-input {
             padding: 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -832,6 +854,11 @@
 
         body.dark-theme .search-btn:hover {
             background: #2d3748;
+        }
+
+        body.dark-theme .search-type-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         @media (max-width: 768px) {
@@ -1277,7 +1304,12 @@
                 <div class="filter-group">
                     <label for="buscaFilter">Buscar:</label>
                     <div class="search-input-container">
-                        <input type="text" id="buscaFilter" class="filter-input" placeholder="Nome do paciente ou ID...">
+                        <select id="tipoBuscaFilter" class="search-type-select">
+                            <option value="todos">Todos</option>
+                            <option value="id">ID</option>
+                            <option value="nome">Nome</option>
+                        </select>
+                        <input type="text" id="buscaFilter" class="filter-input" placeholder="ID ou nome do paciente...">
                         <button class="search-btn" onclick="filtrarProducao()">
                             <i class="fas fa-search"></i>
                         </button>
@@ -1809,6 +1841,7 @@
             const ano = document.getElementById('anoFilter').value;
             const cliente = document.getElementById('clienteFilter').value.toLowerCase();
             const busca = document.getElementById('buscaFilter').value.toLowerCase();
+            const tipoBusca = document.getElementById('tipoBuscaFilter').value;
 
             const productionCards = document.querySelectorAll('.production-card');
             
@@ -1833,14 +1866,27 @@
                     }
                 }
                 
-                // Filtrar por busca (ID ou paciente)
+                // Filtrar por busca (ID ou paciente) baseado no tipo
                 if (busca && mostrar) {
                     const osId = card.querySelector('h4').textContent.toLowerCase();
                     const pacienteElement = card.querySelector('.detail-value');
                     const pacienteText = pacienteElement ? pacienteElement.textContent.toLowerCase() : '';
                     
-                    if (!osId.includes(busca) && !pacienteText.includes(busca)) {
-                        mostrar = false;
+                    if (tipoBusca === 'id') {
+                        // Buscar apenas no ID
+                        if (!osId.includes(busca)) {
+                            mostrar = false;
+                        }
+                    } else if (tipoBusca === 'nome') {
+                        // Buscar apenas no nome do paciente
+                        if (!pacienteText.includes(busca)) {
+                            mostrar = false;
+                        }
+                    } else {
+                        // Buscar em ambos (padrão)
+                        if (!osId.includes(busca) && !pacienteText.includes(busca)) {
+                            mostrar = false;
+                        }
                     }
                 }
                 
@@ -1881,7 +1927,7 @@
             }
             
             // Adicionar eventos para todos os filtros
-            const filtros = ['situacaoFilter', 'mesFilter', 'anoFilter', 'clienteFilter'];
+            const filtros = ['situacaoFilter', 'mesFilter', 'anoFilter', 'clienteFilter', 'tipoBuscaFilter'];
             filtros.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
