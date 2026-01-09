@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt = $conn->prepare($sql);
     
     if ($stmt) {
-        $stmt->bind_param("ssssssssi", 
+        $stmt->bind_param("sssssssi", 
             $data['tipoCliente'], 
             $data['nome'], 
             $data['whatsapp'], 
